@@ -1,0 +1,658 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "RecallOrigin API",
+    "version": "0.1.0a0",
+    "description": "Loopback-only local HTTP adapter backed by a fixed principal and exact partitions. There is no HTTP authentication in this adapter; it is not safe for remote binding or deployment behind a network proxy.",
+    "license": {"name": "Apache-2.0", "identifier": "Apache-2.0"}
+  },
+  "x-recallorigin-contract-version": "1",
+  "x-recallorigin-security-boundary": "loopback-only-fixed-principal",
+  "x-recallorigin-omitted-capabilities": ["event-capture", "revision-list", "feedback"],
+  "servers": [{"url": "http://127.0.0.1:8765", "description": "Loopback-only local server"}],
+  "tags": [{"name": "Memories"}, {"name": "Retrieval"}, {"name": "Governance"}, {"name": "Deletion"}, {"name": "Operations"}],
+  "paths": {
+    "/v1/memories": {
+      "post": {
+        "tags": ["Memories"],
+        "summary": "Explicitly remember a claim",
+        "operationId": "rememberMemory",
+        "parameters": [{"name": "Idempotency-Key", "in": "header", "required": true, "schema": {"type": "string", "minLength": 8, "maxLength": 512}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RememberHttpRequest"}}}},
+        "responses": {
+          "201": {"description": "Successful Response", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RememberHttpResponse"}}}},
+          "403": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "409": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "422": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "503": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}}
+        }
+      }
+    },
+    "/v1/search": {
+      "post": {
+        "tags": ["Retrieval"],
+        "summary": "Search authorized current memories",
+        "operationId": "searchMemories",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/SearchRequest"}}}},
+        "responses": {
+          "200": {"description": "Successful Response", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/SearchHttpResponse"}}}},
+          "403": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "422": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "503": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}}
+        }
+      }
+    },
+    "/v1/context": {
+      "post": {
+        "tags": ["Retrieval"],
+        "summary": "Build a bounded fast or Evidence Context Pack",
+        "operationId": "buildContext",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {"$ref": "#/components/schemas/FastContextHttpRequest"},
+                  {"$ref": "#/components/schemas/EvidenceContextHttpRequest"}
+                ],
+                "title": "Body",
+                "discriminator": {
+                  "propertyName": "mode",
+                  "mapping": {
+                    "fast": "#/components/schemas/FastContextHttpRequest",
+                    "evidence": "#/components/schemas/EvidenceContextHttpRequest"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {"$ref": "#/components/schemas/FastContextHttpResponse"},
+                    {"$ref": "#/components/schemas/EvidenceContextHttpResponse"}
+                  ],
+                  "title": "Response Buildcontext",
+                  "discriminator": {
+                    "propertyName": "mode",
+                    "mapping": {
+                      "fast": "#/components/schemas/FastContextHttpResponse",
+                      "evidence": "#/components/schemas/EvidenceContextHttpResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "404": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "409": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "422": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "503": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}}
+        }
+      }
+    },
+    "/v1/evidence-packs/{pack_id}/resources/{resource_path}": {
+      "get": {
+        "tags": ["Retrieval"],
+        "summary": "Read an authorized Evidence Pack resource",
+        "operationId": "getEvidencePackResource",
+        "parameters": [
+          {"name": "pack_id", "in": "path", "required": true, "schema": {"type": "string"}},
+          {"name": "resource_path", "in": "path", "required": true, "schema": {"type": "string"}}
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorized, unexpired Evidence Pack resource.",
+            "content": {
+              "application/json": {"schema": {}},
+              "text/markdown": {"schema": {"type": "string"}},
+              "text/html": {"schema": {"type": "string"}},
+              "application/octet-stream": {"schema": {"type": "string", "format": "binary"}}
+            }
+          },
+          "403": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "404": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "422": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "503": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}}
+        }
+      }
+    },
+    "/v1/memories/{claim_id}": {
+      "get": {
+        "tags": ["Memories"],
+        "summary": "Get an authorized memory with provenance",
+        "operationId": "getMemory",
+        "parameters": [
+          {"name": "claim_id", "in": "path", "required": true, "schema": {"type": "string"}},
+          {"name": "scope", "in": "query", "required": false, "schema": {"anyOf": [{"type": "string"}, {"type": "null"}]}}
+        ],
+        "responses": {
+          "200": {"description": "Successful Response", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/MemoryGetHttpResponse"}}}},
+          "404": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "422": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "503": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}}
+        }
+      }
+    },
+    "/v1/memories/{claim_id}/govern": {
+      "post": {
+        "tags": ["Governance"],
+        "summary": "Change governance state using revision compare-and-swap",
+        "operationId": "governMemory",
+        "parameters": [
+          {"name": "claim_id", "in": "path", "required": true, "schema": {"type": "string"}},
+          {"name": "Idempotency-Key", "in": "header", "required": true, "schema": {"type": "string", "minLength": 8, "maxLength": 512}}
+        ],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/GovernHttpRequest"}}}},
+        "responses": {
+          "200": {"description": "Successful Response", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/GovernHttpResponse"}}}},
+          "403": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "404": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "409": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "422": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "503": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}}
+        }
+      }
+    },
+    "/v1/deletions": {
+      "post": {
+        "tags": ["Deletion"],
+        "summary": "Submit a typed deletion request",
+        "operationId": "createDeletion",
+        "parameters": [{"name": "Idempotency-Key", "in": "header", "required": true, "schema": {"type": "string", "minLength": 8, "maxLength": 512}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DeletionHttpRequest"}}}},
+        "responses": {
+          "202": {"description": "Successful Response", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DeletionHttpResponse"}}}},
+          "403": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "404": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "409": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "422": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "501": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "503": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}}
+        }
+      }
+    },
+    "/v1/deletions/{deletion_id}": {
+      "get": {
+        "tags": ["Deletion"],
+        "summary": "Get per-layer deletion status",
+        "operationId": "getDeletion",
+        "parameters": [{"name": "deletion_id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "responses": {
+          "200": {"description": "Successful Response", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DeletionHttpResponse"}}}},
+          "404": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "422": {"description": "Validation Error", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/HTTPValidationError"}}}},
+          "503": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}}
+        }
+      }
+    },
+    "/v1/health": {
+      "get": {
+        "tags": ["Operations"],
+        "summary": "Read non-sensitive service health",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {"description": "Successful Response", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/HealthHttpResponse"}}}},
+          "503": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}}
+        }
+      }
+    },
+    "/v1/stats": {
+      "get": {
+        "tags": ["Operations"],
+        "summary": "Read exact-partition-authorized statistics",
+        "operationId": "getStats",
+        "responses": {
+          "200": {"description": "Successful Response", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/StatsHttpResponse"}}}},
+          "403": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}},
+          "503": {"description": "Machine-readable RecallOrigin error.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}}
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Confirmation": {"type": "string", "enum": ["unverified", "user_confirmed", "source_verified", "test_verified"]},
+      "ContextItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "claim_id": {"type": "string"},
+          "revision_id": {"type": "string"},
+          "content": {"type": "string"},
+          "kind": {"$ref": "#/components/schemas/MemoryKind"},
+          "confirmation": {"$ref": "#/components/schemas/Confirmation"},
+          "source_count": {"type": "integer"},
+          "why": {"type": "object", "additionalProperties": true}
+        },
+        "required": ["claim_id", "revision_id", "content", "kind", "confirmation", "source_count", "why"]
+      },
+      "EvidenceContextHttpRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "query": {"type": "string", "minLength": 1, "maxLength": 100000},
+          "scope": {"$ref": "#/components/schemas/PartitionRef"},
+          "token_budget": {"type": "integer", "minimum": 32, "maximum": 100000, "default": 800},
+          "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 8},
+          "valid_at": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+          "known_at_seq": {"anyOf": [{"type": "integer", "minimum": 1}, {"type": "null"}]},
+          "mode": {"type": "string", "const": "evidence"},
+          "ttl_seconds": {"type": "integer", "minimum": 60, "maximum": 604800, "default": 86400}
+        },
+        "required": ["query", "scope", "mode"]
+      },
+      "EvidenceContextHttpResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "mode": {"type": "string", "const": "evidence"},
+          "pack_id": {"type": "string"},
+          "retrieval_id": {"type": "string"},
+          "scope": {"$ref": "#/components/schemas/PartitionRef"},
+          "query": {"type": "string"},
+          "token_budget": {"type": "integer"},
+          "token_count": {"type": "integer"},
+          "selected_count": {"type": "integer", "minimum": 0},
+          "manifest": {"type": "string"},
+          "resource_uris": {"type": "array", "items": {"type": "string"}},
+          "integrity_sha256": {"type": "string", "minLength": 64, "maxLength": 64},
+          "created_at": {"type": "string", "format": "date-time"},
+          "expires_at": {"type": "string", "format": "date-time"},
+          "managed": {"type": "boolean", "const": true, "default": true},
+          "degraded": {"type": "boolean", "default": false},
+          "degradation_reasons": {"type": "array", "items": {"type": "string"}, "default": []},
+          "contract_version": {"type": "string", "const": "1", "default": "1"},
+          "request_id": {"type": "string"},
+          "untrusted_data": {"type": "boolean", "const": true, "default": true}
+        },
+        "required": [
+          "mode",
+          "pack_id",
+          "retrieval_id",
+          "scope",
+          "query",
+          "token_budget",
+          "token_count",
+          "selected_count",
+          "manifest",
+          "resource_uris",
+          "integrity_sha256",
+          "created_at",
+          "expires_at",
+          "request_id"
+        ]
+      },
+      "FastContextHttpRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "query": {"type": "string", "minLength": 1, "maxLength": 100000},
+          "scope": {"$ref": "#/components/schemas/PartitionRef"},
+          "token_budget": {"type": "integer", "minimum": 32, "maximum": 100000, "default": 800},
+          "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 8},
+          "valid_at": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+          "known_at_seq": {"anyOf": [{"type": "integer", "minimum": 1}, {"type": "null"}]},
+          "mode": {"type": "string", "const": "fast"}
+        },
+        "required": ["query", "scope", "mode"]
+      },
+      "FastContextHttpResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "mode": {"type": "string", "const": "fast"},
+          "scope": {"$ref": "#/components/schemas/PartitionRef"},
+          "query": {"type": "string"},
+          "token_budget": {"type": "integer"},
+          "token_count": {"type": "integer"},
+          "items": {"type": "array", "items": {"$ref": "#/components/schemas/ContextItem"}},
+          "omitted": {"type": "array", "items": {"$ref": "#/components/schemas/OmittedContextItem"}},
+          "retrieval_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "degraded": {"type": "boolean", "default": false},
+          "degradation_reasons": {"type": "array", "items": {"type": "string"}, "default": []},
+          "contract_version": {"type": "string", "const": "1", "default": "1"},
+          "request_id": {"type": "string"},
+          "untrusted_data": {"type": "boolean", "const": true, "default": true}
+        },
+        "required": [
+          "mode",
+          "scope",
+          "query",
+          "token_budget",
+          "token_count",
+          "items",
+          "omitted",
+          "request_id"
+        ]
+      },
+      "DeletionHttpRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "target": {"$ref": "#/components/schemas/ForgetTarget"},
+          "scope": {"anyOf": [{"$ref": "#/components/schemas/PartitionRef"}, {"type": "null"}]},
+          "expected_revision_id": {"anyOf": [{"type": "string", "maxLength": 128}, {"type": "null"}]},
+          "cascade_policy": {"type": "string", "enum": ["safe", "purge"], "default": "safe"}
+        },
+        "required": ["target"]
+      },
+      "DeletionHttpResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "deletion_id": {"type": "string"},
+          "target": {"$ref": "#/components/schemas/ForgetTarget"},
+          "state": {"$ref": "#/components/schemas/DeletionState"},
+          "logically_hidden_at": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+          "completed_at": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+          "layers": {"type": "array", "items": {"$ref": "#/components/schemas/DeletionLayerStatus"}},
+          "external_copies": {"type": "array", "items": {"type": "string"}, "default": []},
+          "replayed": {"type": "boolean", "default": false},
+          "contract_version": {"type": "string", "const": "1", "default": "1"},
+          "request_id": {"type": "string"}
+        },
+        "required": ["deletion_id", "target", "state", "logically_hidden_at", "completed_at", "layers", "request_id"]
+      },
+      "DeletionLayerStatus": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "layer": {"type": "string"},
+          "state": {"$ref": "#/components/schemas/DeletionState"},
+          "attempt": {"type": "integer", "minimum": 0},
+          "last_verified_at": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+          "error_code": {"anyOf": [{"type": "string"}, {"type": "null"}]}
+        },
+        "required": ["layer", "state", "attempt"]
+      },
+      "DeletionState": {"type": "string", "enum": ["accepted", "logically_hidden", "completed", "failed"]},
+      "ErrorBody": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "code": {"type": "string"},
+          "message": {"type": "string"},
+          "retryable": {"type": "boolean"},
+          "details": {"anyOf": [{"type": "object", "additionalProperties": true}, {"type": "null"}]}
+        },
+        "required": ["code", "message", "retryable"]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {"type": "string", "const": "1", "default": "1"},
+          "request_id": {"type": "string"},
+          "error": {"$ref": "#/components/schemas/ErrorBody"}
+        },
+        "required": ["request_id", "error"]
+      },
+      "EvidenceRecord": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "evidence_id": {"type": "string"},
+          "event_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "excerpt": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "available": {"type": "boolean"}
+        },
+        "required": ["evidence_id", "event_id", "excerpt", "available"]
+      },
+      "ForgetTarget": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "target_type": {"$ref": "#/components/schemas/ForgetTargetType"},
+          "target_id": {"type": "string", "minLength": 1, "maxLength": 512}
+        },
+        "required": ["target_type", "target_id"]
+      },
+      "ForgetTargetType": {"type": "string", "enum": ["event", "claim", "subject", "partition", "managed_pack"]},
+      "GovernAction": {"type": "string", "enum": ["confirm", "reject", "quarantine", "activate"]},
+      "GovernHttpRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "expected_revision_id": {"type": "string", "minLength": 1, "maxLength": 128},
+          "action": {"$ref": "#/components/schemas/GovernAction"},
+          "reason": {"type": "string", "minLength": 1, "maxLength": 4000}
+        },
+        "required": ["expected_revision_id", "action", "reason"]
+      },
+      "GovernHttpResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "claim_id": {"type": "string"},
+          "previous_revision_id": {"type": "string"},
+          "revision_id": {"type": "string"},
+          "status": {"$ref": "#/components/schemas/MemoryStatus"},
+          "confirmation": {"$ref": "#/components/schemas/Confirmation"},
+          "contract_version": {"type": "string", "const": "1", "default": "1"},
+          "request_id": {"type": "string"},
+          "replayed": {"type": "boolean", "default": false}
+        },
+        "required": ["claim_id", "previous_revision_id", "revision_id", "status", "confirmation", "request_id"]
+      },
+      "HTTPValidationError": {
+        "type": "object",
+        "properties": {"detail": {"type": "array", "items": {"$ref": "#/components/schemas/ValidationError"}}}
+      },
+      "HealthHttpResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "status": {"type": "string", "enum": ["healthy", "degraded", "unhealthy"]},
+          "contract_version": {"type": "string", "const": "1", "default": "1"}
+        },
+        "required": ["status"]
+      },
+      "IndexState": {"type": "string", "enum": ["ready", "pending", "degraded"]},
+      "MemoryGetHttpResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {"type": "string", "const": "1", "default": "1"},
+          "request_id": {"type": "string"},
+          "memory": {"$ref": "#/components/schemas/MemoryRecord"},
+          "untrusted_data": {"type": "boolean", "const": true, "default": true}
+        },
+        "required": ["request_id", "memory"]
+      },
+      "MemoryKind": {"type": "string", "enum": ["semantic", "episodic", "procedural"]},
+      "MemoryRecord": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "claim_id": {"type": "string"},
+          "revision_id": {"type": "string"},
+          "partition": {"$ref": "#/components/schemas/PartitionRef"},
+          "memory_key": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "kind": {"$ref": "#/components/schemas/MemoryKind"},
+          "subtype": {"$ref": "#/components/schemas/MemorySubtype"},
+          "content": {"type": "string"},
+          "status": {"$ref": "#/components/schemas/MemoryStatus"},
+          "confirmation": {"$ref": "#/components/schemas/Confirmation"},
+          "source_count": {"type": "integer", "minimum": 0},
+          "valid_from": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+          "valid_to": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+          "subjects": {"type": "array", "items": {"$ref": "#/components/schemas/SubjectRef"}, "default": []},
+          "revisions": {"type": "array", "items": {"$ref": "#/components/schemas/RevisionRecord"}, "default": []},
+          "evidence": {"type": "array", "items": {"$ref": "#/components/schemas/EvidenceRecord"}, "default": []}
+        },
+        "required": ["claim_id", "revision_id", "partition", "memory_key", "kind", "subtype", "content", "status", "confirmation", "source_count", "valid_from", "valid_to"]
+      },
+      "MemoryStatus": {"type": "string", "enum": ["candidate", "active", "conflicted", "quarantined", "superseded", "unsupported", "withheld", "rebuilding", "rejected", "tombstoned"]},
+      "MemorySubtype": {"type": "string", "enum": ["fact", "preference", "outcome", "decision", "workflow", "gotcha"]},
+      "NamespaceKind": {"type": "string", "enum": ["workspace", "user", "agent_private", "session_private"]},
+      "OmittedContextItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "claim_id": {"type": "string"},
+          "reason": {"type": "string", "enum": ["token_budget", "not_active", "duplicate"]}
+        },
+        "required": ["claim_id", "reason"]
+      },
+      "OriginContextInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "session_id": {"anyOf": [{"type": "string", "maxLength": 256}, {"type": "null"}]},
+          "host_agent_id": {"anyOf": [{"type": "string", "maxLength": 256}, {"type": "null"}]}
+        }
+      },
+      "PartitionRef": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "namespace_kind": {"$ref": "#/components/schemas/NamespaceKind"},
+          "namespace_id": {"type": "string", "minLength": 1, "maxLength": 256}
+        },
+        "required": ["namespace_kind", "namespace_id"]
+      },
+      "RememberHttpRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "content": {"type": "string", "minLength": 1, "maxLength": 1000000},
+          "scope": {"$ref": "#/components/schemas/PartitionRef"},
+          "kind": {"$ref": "#/components/schemas/MemoryKind", "default": "semantic"},
+          "subtype": {"$ref": "#/components/schemas/MemorySubtype", "default": "fact"},
+          "memory_key": {"anyOf": [{"type": "string", "maxLength": 512}, {"type": "null"}]},
+          "subject": {"anyOf": [{"$ref": "#/components/schemas/SubjectRef"}, {"type": "null"}]},
+          "external_event_id": {"type": "string", "minLength": 1, "maxLength": 512},
+          "origin": {"$ref": "#/components/schemas/OriginContextInput"},
+          "valid_from": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+          "valid_to": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]}
+        },
+        "required": ["content", "scope", "external_event_id"]
+      },
+      "RememberHttpResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "event_id": {"type": "string"},
+          "claim_id": {"type": "string"},
+          "revision_id": {"type": "string"},
+          "partition": {"$ref": "#/components/schemas/PartitionRef"},
+          "status": {"$ref": "#/components/schemas/MemoryStatus"},
+          "confirmation": {"$ref": "#/components/schemas/Confirmation"},
+          "source_count": {"type": "integer", "minimum": 0},
+          "index_state": {"$ref": "#/components/schemas/IndexState"},
+          "replayed": {"type": "boolean", "default": false},
+          "contract_version": {"type": "string", "const": "1", "default": "1"},
+          "request_id": {"type": "string"}
+        },
+        "required": ["event_id", "claim_id", "revision_id", "partition", "status", "confirmation", "source_count", "index_state", "request_id"]
+      },
+      "RevisionRecord": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "revision_id": {"type": "string"},
+          "previous_revision_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "status": {"$ref": "#/components/schemas/MemoryStatus"},
+          "confirmation": {"$ref": "#/components/schemas/Confirmation"},
+          "source_count": {"type": "integer", "minimum": 0},
+          "reason": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "tx_from_seq": {"type": "integer", "minimum": 1},
+          "revision_time": {"type": "string", "format": "date-time"}
+        },
+        "required": ["revision_id", "previous_revision_id", "status", "confirmation", "source_count", "reason", "tx_from_seq", "revision_time"]
+      },
+      "SearchHit": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "claim_id": {"type": "string"},
+          "revision_id": {"type": "string"},
+          "partition": {"$ref": "#/components/schemas/PartitionRef"},
+          "kind": {"$ref": "#/components/schemas/MemoryKind"},
+          "subtype": {"$ref": "#/components/schemas/MemorySubtype"},
+          "content": {"type": "string"},
+          "status": {"$ref": "#/components/schemas/MemoryStatus"},
+          "confirmation": {"$ref": "#/components/schemas/Confirmation"},
+          "source_count": {"type": "integer", "minimum": 0},
+          "rank": {"type": "integer", "minimum": 1},
+          "rank_score": {"type": "number", "minimum": 0},
+          "exact_score": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "lexical_score": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "vector_score": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "rrf_score": {"type": "number", "minimum": 0, "default": 0.0}
+        },
+        "required": ["claim_id", "revision_id", "partition", "kind", "subtype", "content", "status", "confirmation", "source_count", "rank", "rank_score"]
+      },
+      "SearchHttpResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {"type": "string", "const": "1", "default": "1"},
+          "request_id": {"type": "string"},
+          "retrieval_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "items": {"type": "array", "items": {"$ref": "#/components/schemas/SearchHit"}},
+          "candidate_count": {"type": "integer", "minimum": 0},
+          "ranking_policy_version": {"type": "integer", "minimum": 1},
+          "degraded": {"type": "boolean", "default": false},
+          "degradation_reasons": {"type": "array", "items": {"type": "string"}, "default": []},
+          "untrusted_data": {"type": "boolean", "const": true, "default": true}
+        },
+        "required": ["request_id", "retrieval_id", "items", "candidate_count", "ranking_policy_version"]
+      },
+      "SearchRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "query": {"type": "string", "minLength": 1, "maxLength": 100000},
+          "scope": {"$ref": "#/components/schemas/PartitionRef"},
+          "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 8},
+          "valid_at": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+          "known_at_seq": {"anyOf": [{"type": "integer", "minimum": 1}, {"type": "null"}]},
+          "include_candidates": {"type": "boolean", "default": false}
+        },
+        "required": ["query", "scope"]
+      },
+      "StatsHttpResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {"type": "string", "const": "1", "default": "1"},
+          "request_id": {"type": "string"},
+          "authorized_partition_count": {"type": "integer", "minimum": 0},
+          "current_claim_count": {"type": "integer", "minimum": 0},
+          "pending_job_count": {"type": "integer", "minimum": 0},
+          "deletion_backlog_count": {"type": "integer", "minimum": 0}
+        },
+        "required": ["request_id", "authorized_partition_count", "current_claim_count", "pending_job_count", "deletion_backlog_count"]
+      },
+      "SubjectRef": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "subject_type": {"type": "string", "minLength": 1, "maxLength": 64},
+          "subject_id": {"type": "string", "minLength": 1, "maxLength": 256}
+        },
+        "required": ["subject_type", "subject_id"]
+      },
+      "ValidationError": {
+        "type": "object",
+        "properties": {
+          "loc": {"type": "array", "items": {"anyOf": [{"type": "string"}, {"type": "integer"}]}},
+          "msg": {"type": "string"},
+          "type": {"type": "string"},
+          "input": {},
+          "ctx": {"type": "object"}
+        },
+        "required": ["loc", "msg", "type"]
+      }
+    }
+  }
+}

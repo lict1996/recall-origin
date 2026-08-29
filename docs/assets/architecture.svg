@@ -1,0 +1,181 @@
+<svg width="1360" height="940" viewBox="0 0 1360 940" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#5178c6" />
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#509863" />
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#d25d5a" />
+    </marker>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#bbbfc4" />
+    </marker>
+  </defs>
+
+
+  <rect width="1360" height="940" fill="#ffffff" />
+
+
+  <rect x="40" y="32" width="1280" height="60" rx="8" fill="#f0f4fc" stroke="none" />
+  <text x="680" y="68" font-size="20" font-weight="bold" fill="#5178c6" text-anchor="middle">Memory with receipts: scope, time, evidence, revisions, explainable recall.</text>
+
+
+  <rect x="40" y="122" width="1280" height="776" fill="none" stroke="#8569cb" stroke-width="2" stroke-dasharray="8 6" rx="12" />
+  <rect x="60" y="134" width="850" height="30" fill="#ffffff" />
+  <text x="66" y="154" font-size="14" font-weight="bold" fill="#8569cb">SECURITY BOUNDARY : Exact partition authorization  |  Recalled content is untrusted data  |  Local-first / no telemetry</text>
+
+
+  <text x="70" y="202" font-size="16" font-weight="bold" fill="#1f2329">Entry Layer</text>
+
+  <rect x="70" y="222" width="200" height="50" rx="6" fill="#ffffff" stroke="#bbbfc4" stroke-width="1.5" />
+  <text x="170" y="244" font-size="14" font-weight="bold" fill="#1f2329" text-anchor="middle">Agent Host</text>
+  <text x="170" y="262" font-size="12" fill="#8f959e" text-anchor="middle">(MCP stdio)</text>
+
+  <rect x="70" y="292" width="200" height="50" rx="6" fill="#ffffff" stroke="#bbbfc4" stroke-width="1.5" />
+  <text x="170" y="314" font-size="14" font-weight="bold" fill="#1f2329" text-anchor="middle">Developer / CI</text>
+  <text x="170" y="332" font-size="12" fill="#8f959e" text-anchor="middle">(recallctl CLI)</text>
+
+  <rect x="70" y="362" width="200" height="50" rx="6" fill="#ffffff" stroke="#bbbfc4" stroke-width="1.5" />
+  <text x="170" y="384" font-size="14" font-weight="bold" fill="#1f2329" text-anchor="middle">Application</text>
+  <text x="170" y="402" font-size="12" fill="#8f959e" text-anchor="middle">(Python API)</text>
+
+  <rect x="70" y="432" width="200" height="50" rx="6" fill="#ffffff" stroke="#bbbfc4" stroke-width="1.5" />
+  <text x="170" y="454" font-size="14" font-weight="bold" fill="#1f2329" text-anchor="middle">Local Services</text>
+  <text x="170" y="472" font-size="12" fill="#8f959e" text-anchor="middle">(loopback-only HTTP)</text>
+
+
+  <text x="320" y="202" font-size="16" font-weight="bold" fill="#1f2329">Core Application</text>
+
+  <rect x="320" y="222" width="220" height="50" rx="6" fill="#ffffff" stroke="#5178c6" stroke-width="1.5" />
+  <text x="430" y="252" font-size="14" font-weight="bold" fill="#1f2329" text-anchor="middle">Capture Service</text>
+
+  <rect x="320" y="292" width="220" height="60" rx="6" fill="#ffffff" stroke="#5178c6" stroke-width="1.5" />
+  <text x="430" y="318" font-size="14" font-weight="bold" fill="#1f2329" text-anchor="middle">Formation Worker</text>
+  <text x="430" y="338" font-size="12" fill="#5178c6" text-anchor="middle">lease / retry / DLQ</text>
+
+  <rect x="320" y="382" width="220" height="50" rx="6" fill="#ffffff" stroke="#5178c6" stroke-width="1.5" />
+  <text x="430" y="412" font-size="14" font-weight="bold" fill="#1f2329" text-anchor="middle">Recall Planner</text>
+
+  <rect x="320" y="472" width="220" height="50" rx="6" fill="#ffffff" stroke="#5178c6" stroke-width="1.5" />
+  <text x="430" y="502" font-size="14" font-weight="bold" fill="#1f2329" text-anchor="middle">Governance / Delete Service</text>
+
+
+  <rect x="610" y="222" width="260" height="190" rx="8" fill="#f5f5f5" stroke="#bbbfc4" stroke-width="1.5" />
+  <text x="626" y="248" font-size="14" font-weight="bold" fill="#1f2329">Derived Projections</text>
+  <text x="626" y="266" font-size="12" fill="#d25d5a">* Rebuildable, not sources of truth</text>
+
+  <rect x="626" y="278" width="228" height="34" rx="4" fill="#ffffff" stroke="#bbbfc4" stroke-width="1" />
+  <text x="740" y="300" font-size="13" font-weight="bold" fill="#1f2329" text-anchor="middle">FTS5 (default retrieval)</text>
+
+  <rect x="626" y="320" width="228" height="34" rx="4" fill="#ffffff" stroke="#bbbfc4" stroke-width="1" />
+  <text x="740" y="342" font-size="13" font-weight="bold" fill="#1f2329" text-anchor="middle">optional VectorRetriever</text>
+
+  <rect x="626" y="362" width="228" height="34" rx="4" fill="#ffffff" stroke="#bbbfc4" stroke-width="1" />
+  <text x="740" y="384" font-size="13" font-weight="bold" fill="#1f2329" text-anchor="middle">versioned RRF</text>
+
+  <rect x="610" y="442" width="260" height="50" rx="6" fill="#eae2fe" stroke="#8569cb" stroke-width="1.5" />
+  <text x="740" y="472" font-size="14" font-weight="bold" fill="#8569cb" text-anchor="middle">Canonical Hydration</text>
+
+
+  <text x="930" y="202" font-size="16" font-weight="bold" fill="#1f2329">Outputs</text>
+
+  <rect x="930" y="222" width="260" height="60" rx="6" fill="#dff5e5" stroke="#509863" stroke-width="1.5" />
+  <text x="1060" y="246" font-size="12" fill="#509863" text-anchor="middle">token-bounded</text>
+  <text x="1060" y="266" font-size="14" font-weight="bold" fill="#1f2329" text-anchor="middle">Fast Context Pack</text>
+
+  <rect x="930" y="312" width="260" height="190" rx="6" fill="#f0f4fc" stroke="#5178c6" stroke-width="1.5" />
+  <text x="950" y="342" font-size="12" fill="#5178c6">managed</text>
+  <text x="950" y="360" font-size="14" font-weight="bold" fill="#1f2329">Evidence Pack</text>
+  <text x="950" y="386" font-size="13" fill="#1f2329">
+    <tspan x="950" dy="0">• MANIFEST</tspan>
+    <tspan x="950" dy="24">• memory revisions</tspan>
+    <tspan x="950" dy="24">• source excerpts</tspan>
+    <tspan x="950" dy="24">• retrieval.json</tspan>
+    <tspan x="950" dy="24">• standalone Inspector</tspan>
+  </text>
+
+
+  <rect x="320" y="612" width="870" height="270" rx="8" fill="#f5f5f5" stroke="#bbbfc4" stroke-width="1.5" />
+  <text x="340" y="642" font-size="16" font-weight="bold" fill="#1f2329">SQLite evidence-first ledger (Authoritative Storage)</text>
+
+
+  <rect x="340" y="672" width="180" height="40" rx="4" fill="#ffffff" stroke="#bbbfc4" stroke-width="1.5" />
+  <text x="430" y="697" font-size="13" font-weight="bold" fill="#1f2329" text-anchor="middle">immutable events</text>
+
+  <rect x="340" y="732" width="180" height="40" rx="4" fill="#ffffff" stroke="#bbbfc4" stroke-width="1.5" />
+  <text x="430" y="757" font-size="13" font-weight="bold" fill="#1f2329" text-anchor="middle">transactional outbox</text>
+
+
+  <rect x="550" y="672" width="180" height="40" rx="4" fill="#ffffff" stroke="#bbbfc4" stroke-width="1.5" />
+  <text x="640" y="697" font-size="13" font-weight="bold" fill="#1f2329" text-anchor="middle">claims + revisions</text>
+
+  <rect x="550" y="732" width="180" height="40" rx="4" fill="#ffffff" stroke="#bbbfc4" stroke-width="1.5" />
+  <text x="640" y="757" font-size="13" font-weight="bold" fill="#1f2329" text-anchor="middle">evidence links</text>
+
+
+  <rect x="760" y="672" width="180" height="40" rx="4" fill="#ffffff" stroke="#bbbfc4" stroke-width="1.5" />
+  <text x="850" y="697" font-size="13" font-weight="bold" fill="#1f2329" text-anchor="middle">retrieval traces</text>
+
+
+  <rect x="970" y="672" width="200" height="40" rx="4" fill="#fee3e2" stroke="#d25d5a" stroke-width="1.5" />
+  <text x="1070" y="697" font-size="13" font-weight="bold" fill="#d25d5a" text-anchor="middle">tombstone fences</text>
+
+  <rect x="970" y="732" width="200" height="60" rx="4" fill="#fee3e2" stroke="#d25d5a" stroke-width="1.5" />
+  <text x="1070" y="757" font-size="13" font-weight="bold" fill="#d25d5a" text-anchor="middle">HMAC-signed purge registry</text>
+  <text x="1070" y="775" font-size="12" fill="#d25d5a" text-anchor="middle">(prevents resurrection)</text>
+
+
+  <path d="M 270 247 L 320 247" fill="none" stroke="#bbbfc4" stroke-width="1.5" marker-end="url(#arrow-gray)" />
+  <path d="M 270 317 L 290 317 L 290 497 L 320 497" fill="none" stroke="#bbbfc4" stroke-width="1.5" marker-end="url(#arrow-gray)" />
+  <path d="M 270 387 L 295 387 L 295 407 L 320 407" fill="none" stroke="#bbbfc4" stroke-width="1.5" marker-end="url(#arrow-gray)" />
+  <path d="M 270 457 L 295 457 L 295 422 L 320 422" fill="none" stroke="#bbbfc4" stroke-width="1.5" marker-end="url(#arrow-gray)" />
+
+
+
+  <path d="M 540 242 L 555 242 L 555 692 L 520 692" fill="none" stroke="#5178c6" stroke-width="2" marker-end="url(#arrow-blue)" />
+
+  <path d="M 540 262 L 570 262 L 570 752 L 520 752" fill="none" stroke="#5178c6" stroke-width="2" marker-end="url(#arrow-blue)" />
+
+  <path d="M 340 752 L 295 752 L 295 322 L 320 322" fill="none" stroke="#5178c6" stroke-width="2" marker-end="url(#arrow-blue)" />
+
+  <path d="M 540 322 L 600 322 L 600 672" fill="none" stroke="#5178c6" stroke-width="2" marker-end="url(#arrow-blue)" />
+
+
+
+  <path d="M 610 397 L 540 397" fill="none" stroke="#509863" stroke-width="2" marker-end="url(#arrow-green)" />
+
+  <path d="M 540 422 L 585 422 L 585 672" fill="none" stroke="#509863" stroke-width="2" marker-end="url(#arrow-green)" />
+
+  <path d="M 640 672 L 640 492" fill="none" stroke="#509863" stroke-width="2" marker-end="url(#arrow-green)" />
+
+  <path d="M 870 457 L 900 457 L 900 252 L 930 252" fill="none" stroke="#509863" stroke-width="2" marker-end="url(#arrow-green)" />
+
+  <path d="M 870 477 L 900 477 L 900 407 L 930 407" fill="none" stroke="#509863" stroke-width="2" marker-end="url(#arrow-green)" />
+
+
+
+  <path d="M 540 497 L 1070 497 L 1070 672" fill="none" stroke="#d25d5a" stroke-width="2" marker-end="url(#arrow-red)" />
+  <text x="805" y="490" font-size="12" font-weight="bold" fill="#d25d5a" text-anchor="middle">fence immediately hides</text>
+
+  <path d="M 1070 712 L 1070 732" fill="none" stroke="#d25d5a" stroke-width="2" marker-end="url(#arrow-red)" />
+  <text x="1080" y="726" font-size="12" font-weight="bold" fill="#d25d5a" text-anchor="start">managed purge</text>
+
+
+  <rect x="70" y="752" width="220" height="110" rx="6" fill="#ffffff" stroke="#bbbfc4" stroke-width="1.5" />
+  <text x="85" y="777" font-size="14" font-weight="bold" fill="#1f2329">Path Legend</text>
+
+
+  <path d="M 85 797 L 125 797" fill="none" stroke="#5178c6" stroke-width="2" marker-end="url(#arrow-blue)" />
+  <text x="140" y="802" font-size="12" fill="#5178c6">Write / Formation</text>
+
+
+  <path d="M 85 822 L 125 822" fill="none" stroke="#509863" stroke-width="2" marker-end="url(#arrow-green)" />
+  <text x="140" y="827" font-size="12" fill="#509863">Recall / Hydration</text>
+
+
+  <path d="M 85 847 L 125 847" fill="none" stroke="#d25d5a" stroke-width="2" marker-end="url(#arrow-red)" />
+  <text x="140" y="852" font-size="12" fill="#d25d5a">Delete / Purge</text>
+</svg>

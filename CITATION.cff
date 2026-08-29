@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use RecallOrigin, please cite the software using these metadata."
+title: RecallOrigin
+type: software
+version: 0.1.0a0
+authors:
+  - name: lict1996
+license: Apache-2.0
+repository-code: "https://github.com/lict1996/recall-origin"
+abstract: >-
+  A source-traceable, revisioned, local-first memory runtime for AI agents,
+  with scoped recall, evidence, and lifecycle governance.
+keywords:
+  - agent memory
+  - artificial intelligence
+  - MCP
+  - retrieval
+  - SQLite

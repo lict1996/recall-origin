@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "recall-origin": {
+      "command": "/absolute/path/to/venv/bin/python",
+      "args": [
+        "-m",
+        "recall_origin.interfaces.mcp",
+        "--db",
+        "/absolute/path/to/recall-origin.sqlite3",
+        "--tenant-id",
+        "local",
+        "--principal-id",
+        "claude-desktop",
+        "--partition",
+        "workspace:example-project"
+      ]
+    }
+  }
+}

@@ -1,0 +1,231 @@
+name: GitHub Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  UV_NO_PROGRESS: "1"
+  UV_VERSION: "0.12.5"
+
+jobs:
+  build:
+    name: Validate and build release artifacts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    outputs:
+      package-version: ${{ steps.version.outputs.package_version }}
+
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: false
+
+      - name: Verify tag, version, and main ancestry
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          package_version="$(python -c \
+            'import pathlib,tomllib; print(tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]["version"])')"
+          tag_version="${GITHUB_REF_NAME#v}"
+          if [[ "$GITHUB_REF_NAME" != v* ]] || [[ "$tag_version" != "$package_version" ]]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package version $package_version"
+            exit 1
+          fi
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" refs/remotes/origin/main; then
+            echo "::error::Release tag is not reachable from main"
+            exit 1
+          fi
+          echo "package_version=$package_version" >> "$GITHUB_OUTPUT"
+
+      - name: Restore locked environment
+        run: uv sync --locked --all-extras --dev
+
+      - name: Run release source gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv lock --check
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run mypy --strict src scripts
+          uv run --extra mcp python scripts/generate_mcp_contract.py --check
+          uv run pytest \
+            --cov=recall_origin \
+            --cov-branch \
+            --cov-report=term-missing \
+            --cov-report=xml
+
+      - name: Run release idempotency gate
+        run: uv run python scripts/reliability_gate.py --iterations 10000
+
+      - name: Build and validate distributions
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_epoch="$(git show -s --format=%ct "$GITHUB_SHA")"
+          SOURCE_DATE_EPOCH="$source_epoch" uv build --no-sources --clear
+          sdist_path="$(find dist -maxdepth 1 -type f -name '*.tar.gz' -print -quit)"
+          test -n "$sdist_path"
+          mkdir -p rebuilt
+          SOURCE_DATE_EPOCH="$source_epoch" \
+            uv build --wheel --no-sources --out-dir rebuilt "$sdist_path"
+          uvx --from twine==7.0.0 twine check dist/* rebuilt/*
+          published_wheel="$(find dist -maxdepth 1 -type f -name '*.whl' -print -quit)"
+          rebuilt_wheel="$(find rebuilt -maxdepth 1 -type f -name '*.whl' -print -quit)"
+          test -n "$published_wheel"
+          test -n "$rebuilt_wheel"
+          uv run python scripts/verify_wheel_contents.py \
+            "$published_wheel" \
+            "$rebuilt_wheel"
+
+      - name: Smoke installed release and rebuilt wheels
+        shell: bash
+        env:
+          PACKAGE_VERSION: ${{ steps.version.outputs.package_version }}
+        run: |
+          set -euo pipefail
+          published_wheel="$(find dist -maxdepth 1 -type f -name '*.whl' -print -quit)"
+          rebuilt_wheel="$(find rebuilt -maxdepth 1 -type f -name '*.whl' -print -quit)"
+          test -n "$published_wheel"
+          test -n "$rebuilt_wheel"
+          for candidate in "published:$published_wheel" "rebuilt:$rebuilt_wheel"; do
+            label="${candidate%%:*}"
+            wheel="${candidate#*:}"
+            release_venv="$RUNNER_TEMP/recall-origin-$label-venv"
+            python -m venv "$release_venv"
+            "$release_venv/bin/python" -m pip install \
+              --disable-pip-version-check \
+              "$wheel[mcp,server]"
+            "$release_venv/bin/python" scripts/package_surface_smoke.py \
+              --expected-version "$PACKAGE_VERSION"
+          done
+
+      - name: Generate SPDX SBOM
+        uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
+        with:
+          path: ${{ runner.temp }}/recall-origin-published-venv
+          format: spdx-json
+          output-file: dist/recall-origin-${{ steps.version.outputs.package_version }}.spdx.json
+          syft-version: v1.51.1
+          dependency-snapshot: false
+          upload-artifact: false
+          upload-release-assets: false
+
+      - name: Verify SPDX SBOM covers published environment
+        shell: bash
+        env:
+          PACKAGE_VERSION: ${{ steps.version.outputs.package_version }}
+        run: |
+          set -euo pipefail
+          python scripts/verify_sbom.py \
+            --sbom "dist/recall-origin-$PACKAGE_VERSION.spdx.json" \
+            --venv-python "$RUNNER_TEMP/recall-origin-published-venv/bin/python" \
+            --expected-version "$PACKAGE_VERSION"
+
+      - name: Create and verify checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd dist
+            sha256sum -- *
+          ) > "$RUNNER_TEMP/SHA256SUMS"
+          mv "$RUNNER_TEMP/SHA256SUMS" dist/SHA256SUMS
+          (
+            cd dist
+            sha256sum --check SHA256SUMS
+          )
+
+      - name: Upload validated release bundle
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-dist
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+
+  attest:
+    name: Attest release artifacts
+    needs:
+      - build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Download validated release bundle
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-dist
+          path: dist
+
+      - name: Generate GitHub build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-checksums: dist/SHA256SUMS
+
+  release:
+    name: Create GitHub Release
+    needs:
+      - build
+      - attest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download attested release bundle
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-dist
+          path: dist
+
+      - name: Verify downloaded checksums
+        working-directory: dist
+        run: sha256sum --check SHA256SUMS
+
+      - name: Create GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          release_flags=()
+          if [[ "${GITHUB_REF_NAME#v}" =~ (a|b|rc|dev)[0-9] ]]; then
+            release_flags+=(--prerelease)
+          fi
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --title "RecallOrigin $GITHUB_REF_NAME" \
+            --generate-notes \
+            "${release_flags[@]}"

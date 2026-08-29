@@ -1,0 +1,77 @@
+{
+  "generated_at_utc": "2026-08-29T18:32:17.724408+00:00",
+  "ingest": {
+    "duration_seconds": 426.681164,
+    "path": "public MemoryEngine.remember (end-to-end)",
+    "writes": 10000,
+    "writes_per_second": 23.436704
+  },
+  "quality": {
+    "case_count": 4,
+    "passed": true,
+    "passed_count": 4
+  },
+  "retrieval": {
+    "by_query_type": {
+      "exact": {
+        "latency_ms": {
+          "p50": 198.130625,
+          "p95": 234.160625,
+          "p99": 262.61925
+        },
+        "mrr": 1.0,
+        "query_count": 84,
+        "recall_at_k": 1.0
+      },
+      "lexical": {
+        "latency_ms": {
+          "p50": 120.953291,
+          "p95": 151.075875,
+          "p99": 175.065917
+        },
+        "mrr": 1.0,
+        "query_count": 166,
+        "recall_at_k": 1.0
+      }
+    },
+    "latency_ms": {
+      "p50": 133.909166,
+      "p95": 226.763375,
+      "p99": 239.991542
+    },
+    "mrr": 1.0,
+    "recall_at_k": 1.0
+  },
+  "runtime": {
+    "logical_cpu_count": 12,
+    "machine": "arm64",
+    "package_version": "0.1.0a0",
+    "platform": "macOS-15.6.1-arm64-arm-64bit",
+    "python_version": "3.12.5",
+    "source_snapshot_sha256": "9786886c23caf807d387009eb02784eeea6b1a76b69fcc91e869c5c5c52b8a72",
+    "sqlite_version": "3.53.3"
+  },
+  "schema_version": "recall-origin-benchmark-summary/v1",
+  "scope": {
+    "corpus_kind": "deterministic synthetic",
+    "cross_system_comparison": false,
+    "document_count": 10000,
+    "durable": true,
+    "k": 10,
+    "query_count": 250,
+    "seed": 20260830,
+    "single_measured_run": true,
+    "vector_baseline": null
+  },
+  "source_artifact": "scale-10000-durable.json",
+  "source_artifact_sha256": "a8483be63b42dd93422ba74d4c3bf07cd6bb5a8f55c9c79ed9480826ded96387",
+  "storage": {
+    "database_file_bytes": {
+      "purge_registry": 40960,
+      "shm": 0,
+      "sqlite": 41136128,
+      "wal": 0
+    },
+    "db_size_bytes": 41177088
+  }
+}

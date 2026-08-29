@@ -1,0 +1,2048 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contract_version": "1",
+  "defaultTools": [
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": false,
+        "title": "Store a memory claim or capture an event"
+      },
+      "description": "Submits explicit content or an event to the common formation and policy pipeline. A normal Agent cannot issue trusted confirmation.",
+      "inputSchema": {
+        "$defs": {
+          "MemoryKind": {
+            "enum": [
+              "semantic",
+              "episodic",
+              "procedural"
+            ],
+            "title": "MemoryKind",
+            "type": "string"
+          },
+          "MemorySubtype": {
+            "enum": [
+              "fact",
+              "preference",
+              "outcome",
+              "decision",
+              "workflow",
+              "gotcha"
+            ],
+            "title": "MemorySubtype",
+            "type": "string"
+          },
+          "SubjectRef": {
+            "additionalProperties": false,
+            "properties": {
+              "subject_id": {
+                "maxLength": 256,
+                "minLength": 1,
+                "title": "Subject Id",
+                "type": "string"
+              },
+              "subject_type": {
+                "maxLength": 64,
+                "minLength": 1,
+                "title": "Subject Type",
+                "type": "string"
+              }
+            },
+            "required": [
+              "subject_type",
+              "subject_id"
+            ],
+            "title": "SubjectRef",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "content": {
+            "maxLength": 1000000,
+            "minLength": 1,
+            "title": "Content",
+            "type": "string"
+          },
+          "event_time": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Event Time"
+          },
+          "event_type": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Event Type"
+          },
+          "external_event_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "External Event Id",
+            "type": "string"
+          },
+          "host_agent_id": {
+            "anyOf": [
+              {
+                "maxLength": 256,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Host Agent Id"
+          },
+          "idempotency_key": {
+            "maxLength": 512,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/$defs/MemoryKind",
+            "default": "semantic"
+          },
+          "memory_key": {
+            "anyOf": [
+              {
+                "maxLength": 512,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Memory Key"
+          },
+          "mode": {
+            "enum": [
+              "remember",
+              "capture"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "maxLength": 256,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Request Id"
+          },
+          "scope": {
+            "maxLength": 512,
+            "minLength": 3,
+            "pattern": "^(workspace|user|agent_private|session_private):[^\\s]+$",
+            "title": "Scope",
+            "type": "string"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "maxLength": 256,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Session Id"
+          },
+          "subjects": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/SubjectRef"
+            },
+            "maxItems": 32,
+            "title": "Subjects",
+            "type": "array"
+          },
+          "subtype": {
+            "$ref": "#/$defs/MemorySubtype",
+            "default": "fact"
+          },
+          "valid_from": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Valid From"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Valid To"
+          }
+        },
+        "required": [
+          "mode",
+          "content",
+          "scope",
+          "external_event_id",
+          "idempotency_key"
+        ],
+        "title": "memory_putArguments",
+        "type": "object"
+      },
+      "name": "memory_put",
+      "outputSchema": {
+        "$defs": {
+          "NamespaceKind": {
+            "enum": [
+              "workspace",
+              "user",
+              "agent_private",
+              "session_private"
+            ],
+            "title": "NamespaceKind",
+            "type": "string"
+          },
+          "PartitionRef": {
+            "additionalProperties": false,
+            "properties": {
+              "namespace_id": {
+                "maxLength": 256,
+                "minLength": 1,
+                "title": "Namespace Id",
+                "type": "string"
+              },
+              "namespace_kind": {
+                "$ref": "#/$defs/NamespaceKind"
+              }
+            },
+            "required": [
+              "namespace_kind",
+              "namespace_id"
+            ],
+            "title": "PartitionRef",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "description": "One structured envelope for explicit and automatic ingestion.",
+        "properties": {
+          "claim_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Claim Id"
+          },
+          "confirmation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Confirmation"
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Id"
+          },
+          "formation_mode": {
+            "enum": [
+              "explicit",
+              "automatic"
+            ],
+            "title": "Formation Mode",
+            "type": "string"
+          },
+          "formation_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Formation Version"
+          },
+          "index_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Index State"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Job Id"
+          },
+          "partition": {
+            "$ref": "#/$defs/PartitionRef"
+          },
+          "replayed": {
+            "default": false,
+            "title": "Replayed",
+            "type": "boolean"
+          },
+          "revision_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Revision Id"
+          },
+          "source_count": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Source Count"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "event_id",
+          "partition",
+          "formation_mode",
+          "status"
+        ],
+        "title": "MemoryPutOutput",
+        "type": "object"
+      },
+      "privileged": false,
+      "requiredCapability": "write",
+      "title": "Store a memory claim or capture an event"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false,
+        "title": "Search authorized memories"
+      },
+      "description": "Returns compact, canonically hydrated candidates from one exact server-authorized partition.",
+      "inputSchema": {
+        "properties": {
+          "include_candidates": {
+            "default": false,
+            "title": "Include Candidates",
+            "type": "boolean"
+          },
+          "known_at_seq": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Known At Seq"
+          },
+          "limit": {
+            "default": 8,
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "query": {
+            "maxLength": 100000,
+            "minLength": 1,
+            "title": "Query",
+            "type": "string"
+          },
+          "scope": {
+            "maxLength": 512,
+            "minLength": 3,
+            "pattern": "^(workspace|user|agent_private|session_private):[^\\s]+$",
+            "title": "Scope",
+            "type": "string"
+          },
+          "valid_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Valid At"
+          }
+        },
+        "required": [
+          "query",
+          "scope"
+        ],
+        "title": "memory_searchArguments",
+        "type": "object"
+      },
+      "name": "memory_search",
+      "outputSchema": {
+        "$defs": {
+          "Confirmation": {
+            "enum": [
+              "unverified",
+              "user_confirmed",
+              "source_verified",
+              "test_verified"
+            ],
+            "title": "Confirmation",
+            "type": "string"
+          },
+          "MemoryKind": {
+            "enum": [
+              "semantic",
+              "episodic",
+              "procedural"
+            ],
+            "title": "MemoryKind",
+            "type": "string"
+          },
+          "MemoryStatus": {
+            "enum": [
+              "candidate",
+              "active",
+              "conflicted",
+              "quarantined",
+              "superseded",
+              "unsupported",
+              "withheld",
+              "rebuilding",
+              "rejected",
+              "tombstoned"
+            ],
+            "title": "MemoryStatus",
+            "type": "string"
+          },
+          "MemorySubtype": {
+            "enum": [
+              "fact",
+              "preference",
+              "outcome",
+              "decision",
+              "workflow",
+              "gotcha"
+            ],
+            "title": "MemorySubtype",
+            "type": "string"
+          },
+          "NamespaceKind": {
+            "enum": [
+              "workspace",
+              "user",
+              "agent_private",
+              "session_private"
+            ],
+            "title": "NamespaceKind",
+            "type": "string"
+          },
+          "PartitionRef": {
+            "additionalProperties": false,
+            "properties": {
+              "namespace_id": {
+                "maxLength": 256,
+                "minLength": 1,
+                "title": "Namespace Id",
+                "type": "string"
+              },
+              "namespace_kind": {
+                "$ref": "#/$defs/NamespaceKind"
+              }
+            },
+            "required": [
+              "namespace_kind",
+              "namespace_id"
+            ],
+            "title": "PartitionRef",
+            "type": "object"
+          },
+          "SearchHit": {
+            "additionalProperties": false,
+            "properties": {
+              "claim_id": {
+                "title": "Claim Id",
+                "type": "string"
+              },
+              "confirmation": {
+                "$ref": "#/$defs/Confirmation"
+              },
+              "content": {
+                "title": "Content",
+                "type": "string"
+              },
+              "exact_score": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Exact Score"
+              },
+              "kind": {
+                "$ref": "#/$defs/MemoryKind"
+              },
+              "lexical_score": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Lexical Score"
+              },
+              "partition": {
+                "$ref": "#/$defs/PartitionRef"
+              },
+              "rank": {
+                "minimum": 1,
+                "title": "Rank",
+                "type": "integer"
+              },
+              "rank_score": {
+                "minimum": 0,
+                "title": "Rank Score",
+                "type": "number"
+              },
+              "revision_id": {
+                "title": "Revision Id",
+                "type": "string"
+              },
+              "rrf_score": {
+                "default": 0.0,
+                "minimum": 0,
+                "title": "Rrf Score",
+                "type": "number"
+              },
+              "source_count": {
+                "minimum": 0,
+                "title": "Source Count",
+                "type": "integer"
+              },
+              "status": {
+                "$ref": "#/$defs/MemoryStatus"
+              },
+              "subtype": {
+                "$ref": "#/$defs/MemorySubtype"
+              },
+              "vector_score": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Vector Score"
+              }
+            },
+            "required": [
+              "claim_id",
+              "revision_id",
+              "partition",
+              "kind",
+              "subtype",
+              "content",
+              "status",
+              "confirmation",
+              "source_count",
+              "rank",
+              "rank_score"
+            ],
+            "title": "SearchHit",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "description": "MCP envelope for a canonically hydrated search.",
+        "properties": {
+          "candidate_count": {
+            "minimum": 0,
+            "title": "Candidate Count",
+            "type": "integer"
+          },
+          "degradation_reasons": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Degradation Reasons",
+            "type": "array"
+          },
+          "degraded": {
+            "default": false,
+            "title": "Degraded",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/$defs/SearchHit"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "ranking_policy_version": {
+            "minimum": 1,
+            "title": "Ranking Policy Version",
+            "type": "integer"
+          },
+          "retrieval_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retrieval Id"
+          },
+          "untrusted_data": {
+            "const": true,
+            "default": true,
+            "title": "Untrusted Data",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "retrieval_id",
+          "items",
+          "candidate_count",
+          "ranking_policy_version"
+        ],
+        "title": "MemorySearchOutput",
+        "type": "object"
+      },
+      "privileged": false,
+      "requiredCapability": "read",
+      "title": "Search authorized memories"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false,
+        "title": "Build a bounded context pack"
+      },
+      "description": "Builds a token-budgeted Fast Context Pack or a managed Evidence Pack whose opaque resources can be read through MCP.",
+      "inputSchema": {
+        "properties": {
+          "known_at_seq": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Known At Seq"
+          },
+          "limit": {
+            "default": 8,
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "mode": {
+            "default": "fast",
+            "enum": [
+              "fast",
+              "evidence"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "query": {
+            "maxLength": 100000,
+            "minLength": 1,
+            "title": "Query",
+            "type": "string"
+          },
+          "scope": {
+            "maxLength": 512,
+            "minLength": 3,
+            "pattern": "^(workspace|user|agent_private|session_private):[^\\s]+$",
+            "title": "Scope",
+            "type": "string"
+          },
+          "token_budget": {
+            "default": 800,
+            "maximum": 100000,
+            "minimum": 32,
+            "title": "Token Budget",
+            "type": "integer"
+          },
+          "ttl_seconds": {
+            "default": 86400,
+            "maximum": 604800,
+            "minimum": 60,
+            "title": "Ttl Seconds",
+            "type": "integer"
+          },
+          "valid_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Valid At"
+          }
+        },
+        "required": [
+          "query",
+          "scope"
+        ],
+        "title": "memory_contextArguments",
+        "type": "object"
+      },
+      "name": "memory_context",
+      "outputSchema": {
+        "$defs": {
+          "Confirmation": {
+            "enum": [
+              "unverified",
+              "user_confirmed",
+              "source_verified",
+              "test_verified"
+            ],
+            "title": "Confirmation",
+            "type": "string"
+          },
+          "ContextItem": {
+            "additionalProperties": false,
+            "properties": {
+              "claim_id": {
+                "title": "Claim Id",
+                "type": "string"
+              },
+              "confirmation": {
+                "$ref": "#/$defs/Confirmation"
+              },
+              "content": {
+                "title": "Content",
+                "type": "string"
+              },
+              "kind": {
+                "$ref": "#/$defs/MemoryKind"
+              },
+              "revision_id": {
+                "title": "Revision Id",
+                "type": "string"
+              },
+              "source_count": {
+                "title": "Source Count",
+                "type": "integer"
+              },
+              "why": {
+                "additionalProperties": true,
+                "title": "Why",
+                "type": "object"
+              }
+            },
+            "required": [
+              "claim_id",
+              "revision_id",
+              "content",
+              "kind",
+              "confirmation",
+              "source_count",
+              "why"
+            ],
+            "title": "ContextItem",
+            "type": "object"
+          },
+          "MemoryEvidenceContextOutput": {
+            "additionalProperties": false,
+            "description": "Evidence context pack with opaque, MCP-readable resource URIs.",
+            "properties": {
+              "created_at": {
+                "format": "date-time",
+                "title": "Created At",
+                "type": "string"
+              },
+              "degradation_reasons": {
+                "default": [],
+                "items": {
+                  "type": "string"
+                },
+                "title": "Degradation Reasons",
+                "type": "array"
+              },
+              "degraded": {
+                "default": false,
+                "title": "Degraded",
+                "type": "boolean"
+              },
+              "expires_at": {
+                "format": "date-time",
+                "title": "Expires At",
+                "type": "string"
+              },
+              "integrity_sha256": {
+                "maxLength": 64,
+                "minLength": 64,
+                "title": "Integrity Sha256",
+                "type": "string"
+              },
+              "managed": {
+                "const": true,
+                "default": true,
+                "title": "Managed",
+                "type": "boolean"
+              },
+              "manifest": {
+                "title": "Manifest",
+                "type": "string"
+              },
+              "mode": {
+                "const": "evidence",
+                "default": "evidence",
+                "title": "Mode",
+                "type": "string"
+              },
+              "pack_id": {
+                "title": "Pack Id",
+                "type": "string"
+              },
+              "query": {
+                "title": "Query",
+                "type": "string"
+              },
+              "resource_uris": {
+                "items": {
+                  "type": "string"
+                },
+                "title": "Resource Uris",
+                "type": "array"
+              },
+              "retrieval_id": {
+                "title": "Retrieval Id",
+                "type": "string"
+              },
+              "scope": {
+                "$ref": "#/$defs/PartitionRef"
+              },
+              "selected_count": {
+                "minimum": 0,
+                "title": "Selected Count",
+                "type": "integer"
+              },
+              "token_budget": {
+                "title": "Token Budget",
+                "type": "integer"
+              },
+              "token_count": {
+                "title": "Token Count",
+                "type": "integer"
+              },
+              "untrusted_data": {
+                "const": true,
+                "default": true,
+                "title": "Untrusted Data",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "pack_id",
+              "retrieval_id",
+              "scope",
+              "query",
+              "token_budget",
+              "token_count",
+              "selected_count",
+              "manifest",
+              "resource_uris",
+              "integrity_sha256",
+              "created_at",
+              "expires_at"
+            ],
+            "title": "MemoryEvidenceContextOutput",
+            "type": "object"
+          },
+          "MemoryFastContextOutput": {
+            "additionalProperties": false,
+            "description": "Fast context pack marked as untrusted protocol data.",
+            "properties": {
+              "degradation_reasons": {
+                "default": [],
+                "items": {
+                  "type": "string"
+                },
+                "title": "Degradation Reasons",
+                "type": "array"
+              },
+              "degraded": {
+                "default": false,
+                "title": "Degraded",
+                "type": "boolean"
+              },
+              "items": {
+                "items": {
+                  "$ref": "#/$defs/ContextItem"
+                },
+                "title": "Items",
+                "type": "array"
+              },
+              "mode": {
+                "const": "fast",
+                "default": "fast",
+                "title": "Mode",
+                "type": "string"
+              },
+              "omitted": {
+                "items": {
+                  "$ref": "#/$defs/OmittedContextItem"
+                },
+                "title": "Omitted",
+                "type": "array"
+              },
+              "query": {
+                "title": "Query",
+                "type": "string"
+              },
+              "retrieval_id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Retrieval Id"
+              },
+              "scope": {
+                "$ref": "#/$defs/PartitionRef"
+              },
+              "token_budget": {
+                "title": "Token Budget",
+                "type": "integer"
+              },
+              "token_count": {
+                "title": "Token Count",
+                "type": "integer"
+              },
+              "untrusted_data": {
+                "const": true,
+                "default": true,
+                "title": "Untrusted Data",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "scope",
+              "query",
+              "token_budget",
+              "token_count",
+              "items",
+              "omitted"
+            ],
+            "title": "MemoryFastContextOutput",
+            "type": "object"
+          },
+          "MemoryKind": {
+            "enum": [
+              "semantic",
+              "episodic",
+              "procedural"
+            ],
+            "title": "MemoryKind",
+            "type": "string"
+          },
+          "NamespaceKind": {
+            "enum": [
+              "workspace",
+              "user",
+              "agent_private",
+              "session_private"
+            ],
+            "title": "NamespaceKind",
+            "type": "string"
+          },
+          "OmittedContextItem": {
+            "additionalProperties": false,
+            "properties": {
+              "claim_id": {
+                "title": "Claim Id",
+                "type": "string"
+              },
+              "reason": {
+                "enum": [
+                  "token_budget",
+                  "not_active",
+                  "duplicate"
+                ],
+                "title": "Reason",
+                "type": "string"
+              }
+            },
+            "required": [
+              "claim_id",
+              "reason"
+            ],
+            "title": "OmittedContextItem",
+            "type": "object"
+          },
+          "PartitionRef": {
+            "additionalProperties": false,
+            "properties": {
+              "namespace_id": {
+                "maxLength": 256,
+                "minLength": 1,
+                "title": "Namespace Id",
+                "type": "string"
+              },
+              "namespace_kind": {
+                "$ref": "#/$defs/NamespaceKind"
+              }
+            },
+            "required": [
+              "namespace_kind",
+              "namespace_id"
+            ],
+            "title": "PartitionRef",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "result": {
+            "discriminator": {
+              "mapping": {
+                "evidence": "#/$defs/MemoryEvidenceContextOutput",
+                "fast": "#/$defs/MemoryFastContextOutput"
+              },
+              "propertyName": "mode"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/MemoryFastContextOutput"
+              },
+              {
+                "$ref": "#/$defs/MemoryEvidenceContextOutput"
+              }
+            ],
+            "title": "Result"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "memory_contextOutput",
+        "type": "object"
+      },
+      "privileged": false,
+      "requiredCapability": "read",
+      "title": "Build a bounded context pack"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true,
+        "title": "Get one authorized memory"
+      },
+      "description": "Gets one canonical memory after object-level authorization and deletion-fence checks.",
+      "inputSchema": {
+        "properties": {
+          "claim_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Claim Id",
+            "type": "string"
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "maxLength": 512,
+                "minLength": 3,
+                "pattern": "^(workspace|user|agent_private|session_private):[^\\s]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Scope"
+          }
+        },
+        "required": [
+          "claim_id"
+        ],
+        "title": "memory_getArguments",
+        "type": "object"
+      },
+      "name": "memory_get",
+      "outputSchema": {
+        "$defs": {
+          "Confirmation": {
+            "enum": [
+              "unverified",
+              "user_confirmed",
+              "source_verified",
+              "test_verified"
+            ],
+            "title": "Confirmation",
+            "type": "string"
+          },
+          "EvidenceRecord": {
+            "additionalProperties": false,
+            "properties": {
+              "available": {
+                "title": "Available",
+                "type": "boolean"
+              },
+              "event_id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Event Id"
+              },
+              "evidence_id": {
+                "title": "Evidence Id",
+                "type": "string"
+              },
+              "excerpt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Excerpt"
+              }
+            },
+            "required": [
+              "evidence_id",
+              "event_id",
+              "excerpt",
+              "available"
+            ],
+            "title": "EvidenceRecord",
+            "type": "object"
+          },
+          "MemoryKind": {
+            "enum": [
+              "semantic",
+              "episodic",
+              "procedural"
+            ],
+            "title": "MemoryKind",
+            "type": "string"
+          },
+          "MemoryStatus": {
+            "enum": [
+              "candidate",
+              "active",
+              "conflicted",
+              "quarantined",
+              "superseded",
+              "unsupported",
+              "withheld",
+              "rebuilding",
+              "rejected",
+              "tombstoned"
+            ],
+            "title": "MemoryStatus",
+            "type": "string"
+          },
+          "MemorySubtype": {
+            "enum": [
+              "fact",
+              "preference",
+              "outcome",
+              "decision",
+              "workflow",
+              "gotcha"
+            ],
+            "title": "MemorySubtype",
+            "type": "string"
+          },
+          "NamespaceKind": {
+            "enum": [
+              "workspace",
+              "user",
+              "agent_private",
+              "session_private"
+            ],
+            "title": "NamespaceKind",
+            "type": "string"
+          },
+          "PartitionRef": {
+            "additionalProperties": false,
+            "properties": {
+              "namespace_id": {
+                "maxLength": 256,
+                "minLength": 1,
+                "title": "Namespace Id",
+                "type": "string"
+              },
+              "namespace_kind": {
+                "$ref": "#/$defs/NamespaceKind"
+              }
+            },
+            "required": [
+              "namespace_kind",
+              "namespace_id"
+            ],
+            "title": "PartitionRef",
+            "type": "object"
+          },
+          "RevisionRecord": {
+            "additionalProperties": false,
+            "properties": {
+              "confirmation": {
+                "$ref": "#/$defs/Confirmation"
+              },
+              "previous_revision_id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Previous Revision Id"
+              },
+              "reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Reason"
+              },
+              "revision_id": {
+                "title": "Revision Id",
+                "type": "string"
+              },
+              "revision_time": {
+                "format": "date-time",
+                "title": "Revision Time",
+                "type": "string"
+              },
+              "source_count": {
+                "minimum": 0,
+                "title": "Source Count",
+                "type": "integer"
+              },
+              "status": {
+                "$ref": "#/$defs/MemoryStatus"
+              },
+              "tx_from_seq": {
+                "minimum": 1,
+                "title": "Tx From Seq",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "revision_id",
+              "previous_revision_id",
+              "status",
+              "confirmation",
+              "source_count",
+              "reason",
+              "tx_from_seq",
+              "revision_time"
+            ],
+            "title": "RevisionRecord",
+            "type": "object"
+          },
+          "SubjectRef": {
+            "additionalProperties": false,
+            "properties": {
+              "subject_id": {
+                "maxLength": 256,
+                "minLength": 1,
+                "title": "Subject Id",
+                "type": "string"
+              },
+              "subject_type": {
+                "maxLength": 64,
+                "minLength": 1,
+                "title": "Subject Type",
+                "type": "string"
+              }
+            },
+            "required": [
+              "subject_type",
+              "subject_id"
+            ],
+            "title": "SubjectRef",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Canonical memory marked as untrusted protocol data.",
+        "properties": {
+          "claim_id": {
+            "title": "Claim Id",
+            "type": "string"
+          },
+          "confirmation": {
+            "$ref": "#/$defs/Confirmation"
+          },
+          "content": {
+            "title": "Content",
+            "type": "string"
+          },
+          "evidence": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/EvidenceRecord"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "kind": {
+            "$ref": "#/$defs/MemoryKind"
+          },
+          "memory_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Memory Key"
+          },
+          "partition": {
+            "$ref": "#/$defs/PartitionRef"
+          },
+          "revision_id": {
+            "title": "Revision Id",
+            "type": "string"
+          },
+          "revisions": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/RevisionRecord"
+            },
+            "title": "Revisions",
+            "type": "array"
+          },
+          "source_count": {
+            "minimum": 0,
+            "title": "Source Count",
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/$defs/MemoryStatus"
+          },
+          "subjects": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/SubjectRef"
+            },
+            "title": "Subjects",
+            "type": "array"
+          },
+          "subtype": {
+            "$ref": "#/$defs/MemorySubtype"
+          },
+          "untrusted_data": {
+            "const": true,
+            "default": true,
+            "title": "Untrusted Data",
+            "type": "boolean"
+          },
+          "valid_from": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid From"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid To"
+          }
+        },
+        "required": [
+          "claim_id",
+          "revision_id",
+          "partition",
+          "memory_key",
+          "kind",
+          "subtype",
+          "content",
+          "status",
+          "confirmation",
+          "source_count",
+          "valid_from",
+          "valid_to"
+        ],
+        "title": "MemoryGetOutput",
+        "type": "object"
+      },
+      "privileged": false,
+      "requiredCapability": "read",
+      "title": "Get one authorized memory"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false,
+        "title": "Append memory feedback"
+      },
+      "description": "Appends feedback without directly changing claim status or confirmation.",
+      "inputSchema": {
+        "$defs": {
+          "FeedbackType": {
+            "enum": [
+              "helpful",
+              "not_helpful",
+              "incorrect",
+              "stale",
+              "proposal"
+            ],
+            "title": "FeedbackType",
+            "type": "string"
+          }
+        },
+        "properties": {
+          "claim_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Claim Id",
+            "type": "string"
+          },
+          "feedback_type": {
+            "$ref": "#/$defs/FeedbackType"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 4096,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reason"
+          },
+          "revision_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Revision Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "claim_id",
+          "revision_id",
+          "feedback_type"
+        ],
+        "title": "memory_feedbackArguments",
+        "type": "object"
+      },
+      "name": "memory_feedback",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "appended": {
+            "const": true,
+            "default": true,
+            "title": "Appended",
+            "type": "boolean"
+          },
+          "claim_id": {
+            "title": "Claim Id",
+            "type": "string"
+          },
+          "feedback_id": {
+            "title": "Feedback Id",
+            "type": "string"
+          },
+          "revision_id": {
+            "title": "Revision Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "feedback_id",
+          "claim_id",
+          "revision_id"
+        ],
+        "title": "FeedbackReceipt",
+        "type": "object"
+      },
+      "privileged": false,
+      "requiredCapability": "feedback",
+      "title": "Append memory feedback"
+    }
+  ],
+  "implementation": {
+    "generator": "scripts/generate_mcp_contract.py",
+    "implemented": true,
+    "official_sdk": "mcp>=1.12,<2",
+    "transport": "stdio"
+  },
+  "privilegedTools": [
+    {
+      "annotations": {
+        "destructiveHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": false,
+        "title": "Govern a memory revision"
+      },
+      "description": "Confirms, rejects, quarantines, or activates a claim using revision compare-and-swap. The actor comes from server configuration.",
+      "inputSchema": {
+        "$defs": {
+          "GovernAction": {
+            "enum": [
+              "confirm",
+              "reject",
+              "quarantine",
+              "activate"
+            ],
+            "title": "GovernAction",
+            "type": "string"
+          }
+        },
+        "properties": {
+          "action": {
+            "$ref": "#/$defs/GovernAction"
+          },
+          "claim_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Claim Id",
+            "type": "string"
+          },
+          "expected_revision_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Expected Revision Id",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "claim_id",
+          "expected_revision_id",
+          "action",
+          "reason"
+        ],
+        "title": "memory_governArguments",
+        "type": "object"
+      },
+      "name": "memory_govern",
+      "outputSchema": {
+        "$defs": {
+          "Confirmation": {
+            "enum": [
+              "unverified",
+              "user_confirmed",
+              "source_verified",
+              "test_verified"
+            ],
+            "title": "Confirmation",
+            "type": "string"
+          },
+          "MemoryStatus": {
+            "enum": [
+              "candidate",
+              "active",
+              "conflicted",
+              "quarantined",
+              "superseded",
+              "unsupported",
+              "withheld",
+              "rebuilding",
+              "rejected",
+              "tombstoned"
+            ],
+            "title": "MemoryStatus",
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "claim_id": {
+            "title": "Claim Id",
+            "type": "string"
+          },
+          "confirmation": {
+            "$ref": "#/$defs/Confirmation"
+          },
+          "previous_revision_id": {
+            "title": "Previous Revision Id",
+            "type": "string"
+          },
+          "revision_id": {
+            "title": "Revision Id",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/$defs/MemoryStatus"
+          }
+        },
+        "required": [
+          "claim_id",
+          "previous_revision_id",
+          "revision_id",
+          "status",
+          "confirmation"
+        ],
+        "title": "GovernReceipt",
+        "type": "object"
+      },
+      "privileged": true,
+      "requiredCapability": "govern",
+      "title": "Govern a memory revision"
+    },
+    {
+      "annotations": {
+        "destructiveHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": false,
+        "title": "Submit a typed deletion"
+      },
+      "description": "Creates an idempotent deletion fence before engine-managed purge. External copies remain outside the engine's direct control.",
+      "inputSchema": {
+        "$defs": {
+          "ForgetTarget": {
+            "additionalProperties": false,
+            "properties": {
+              "target_id": {
+                "maxLength": 512,
+                "minLength": 1,
+                "title": "Target Id",
+                "type": "string"
+              },
+              "target_type": {
+                "$ref": "#/$defs/ForgetTargetType"
+              }
+            },
+            "required": [
+              "target_type",
+              "target_id"
+            ],
+            "title": "ForgetTarget",
+            "type": "object"
+          },
+          "ForgetTargetType": {
+            "enum": [
+              "event",
+              "claim",
+              "subject",
+              "partition",
+              "managed_pack"
+            ],
+            "title": "ForgetTargetType",
+            "type": "string"
+          }
+        },
+        "properties": {
+          "cascade_policy": {
+            "default": "safe",
+            "enum": [
+              "safe",
+              "purge"
+            ],
+            "title": "Cascade Policy",
+            "type": "string"
+          },
+          "expected_revision_id": {
+            "anyOf": [
+              {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Expected Revision Id"
+          },
+          "idempotency_key": {
+            "maxLength": 512,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "maxLength": 512,
+                "minLength": 3,
+                "pattern": "^(workspace|user|agent_private|session_private):[^\\s]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Scope"
+          },
+          "target": {
+            "$ref": "#/$defs/ForgetTarget"
+          }
+        },
+        "required": [
+          "target",
+          "idempotency_key"
+        ],
+        "title": "memory_forgetArguments",
+        "type": "object"
+      },
+      "name": "memory_forget",
+      "outputSchema": {
+        "$defs": {
+          "DeletionLayerStatus": {
+            "additionalProperties": false,
+            "properties": {
+              "attempt": {
+                "minimum": 0,
+                "title": "Attempt",
+                "type": "integer"
+              },
+              "error_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Error Code"
+              },
+              "last_verified_at": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Last Verified At"
+              },
+              "layer": {
+                "title": "Layer",
+                "type": "string"
+              },
+              "state": {
+                "$ref": "#/$defs/DeletionState"
+              }
+            },
+            "required": [
+              "layer",
+              "state",
+              "attempt"
+            ],
+            "title": "DeletionLayerStatus",
+            "type": "object"
+          },
+          "DeletionState": {
+            "enum": [
+              "accepted",
+              "logically_hidden",
+              "completed",
+              "failed"
+            ],
+            "title": "DeletionState",
+            "type": "string"
+          },
+          "ForgetTarget": {
+            "additionalProperties": false,
+            "properties": {
+              "target_id": {
+                "maxLength": 512,
+                "minLength": 1,
+                "title": "Target Id",
+                "type": "string"
+              },
+              "target_type": {
+                "$ref": "#/$defs/ForgetTargetType"
+              }
+            },
+            "required": [
+              "target_type",
+              "target_id"
+            ],
+            "title": "ForgetTarget",
+            "type": "object"
+          },
+          "ForgetTargetType": {
+            "enum": [
+              "event",
+              "claim",
+              "subject",
+              "partition",
+              "managed_pack"
+            ],
+            "title": "ForgetTargetType",
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "deletion_id": {
+            "title": "Deletion Id",
+            "type": "string"
+          },
+          "external_copies": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "External Copies",
+            "type": "array"
+          },
+          "layers": {
+            "items": {
+              "$ref": "#/$defs/DeletionLayerStatus"
+            },
+            "title": "Layers",
+            "type": "array"
+          },
+          "logically_hidden_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logically Hidden At"
+          },
+          "replayed": {
+            "default": false,
+            "title": "Replayed",
+            "type": "boolean"
+          },
+          "state": {
+            "$ref": "#/$defs/DeletionState"
+          },
+          "target": {
+            "$ref": "#/$defs/ForgetTarget"
+          }
+        },
+        "required": [
+          "deletion_id",
+          "target",
+          "state",
+          "logically_hidden_at",
+          "completed_at",
+          "layers"
+        ],
+        "title": "DeletionReceipt",
+        "type": "object"
+      },
+      "privileged": true,
+      "requiredCapability": "delete",
+      "title": "Submit a typed deletion"
+    }
+  ],
+  "resources": [
+    {
+      "description": "One canonical memory after object-level authorization and deletion checks.",
+      "mimeType": "application/json",
+      "name": "Authorized memory entry",
+      "requiredCapability": "read",
+      "uriTemplate": "memory://entries/{claim_id}"
+    },
+    {
+      "description": "One immutable resource from an active, unexpired Evidence Pack after object-level authorization.",
+      "mimeType": "application/octet-stream",
+      "name": "Authorized Evidence Pack resource",
+      "requiredCapability": "read",
+      "uriTemplate": "memory://packs/{pack_id}/{resource_key}"
+    },
+    {
+      "description": "Enabled tool schemas and fixed authorization rules.",
+      "mimeType": "application/json",
+      "name": "RecallOrigin schema",
+      "requiredCapability": "read",
+      "uri": "memory://schema"
+    },
+    {
+      "description": "Statistics limited to exact partitions authorized at server startup.",
+      "mimeType": "application/json",
+      "name": "Authorized RecallOrigin statistics",
+      "requiredCapability": "read",
+      "uri": "memory://stats"
+    }
+  ],
+  "security_model": {
+    "content_trust": "Recalled memory and Evidence Pack resources are untrusted data.",
+    "default_capabilities": [
+      "read",
+      "write",
+      "feedback"
+    ],
+    "identity_source": "trusted server startup configuration",
+    "privileged_capabilities": [
+      "govern",
+      "delete"
+    ],
+    "scope_rule": "Tool arguments may only select one of the server-authorized exact partitions."
+  },
+  "status": "implemented-alpha",
+  "title": "RecallOrigin MCP stdio contract"
+}

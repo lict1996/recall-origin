@@ -1,0 +1,73 @@
+name: Feature request
+description: Propose a focused improvement with a concrete agent use case
+title: "[Feature] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        RecallOrigin prioritizes a small, reliable evidence-first core. Please
+        describe the problem before the proposed implementation.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and agent use case
+      description: What task is blocked or unnecessarily expensive today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe observable behavior, not only an API shape.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Primary surface
+      options:
+        - Core memory lifecycle
+        - Retrieval or Context Pack
+        - Python API
+        - CLI
+        - MCP stdio
+        - HTTP API
+        - Inspector
+        - Benchmark or reliability tooling
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence and acceptance criteria
+      description: How should the change be tested or measured?
+    validations:
+      required: true
+
+  - type: textarea
+    id: trust
+    attributes:
+      label: Trust-boundary impact
+      description: Note effects on partitions, evidence, deletion, exports, or untrusted content.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and non-goals
+      description: What simpler approach was considered, and what should remain out of scope?
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Submission checks
+      options:
+        - label: I searched for an existing issue or pull request.
+          required: true
+        - label: The request does not depend on distributed HA or SOTA claims.
+          required: true

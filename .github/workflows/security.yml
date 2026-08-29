@@ -1,0 +1,93 @@
+name: Security checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  schedule:
+    - cron: "41 2 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_NO_PROGRESS: "1"
+  UV_VERSION: "0.12.5"
+
+jobs:
+  runtime-audit:
+    name: Audit locked runtime dependencies
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Export and audit locked runtime dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv lock --check
+          uv sync --locked --all-extras --dev
+          audit_requirements="$RUNNER_TEMP/recall-origin-runtime-requirements.txt"
+          uv export \
+            --locked \
+            --all-extras \
+            --no-dev \
+            --no-emit-project \
+            --format requirements-txt \
+            --output-file "$audit_requirements"
+          uv run pip-audit \
+            --requirement "$audit_requirements" \
+            --strict \
+            --require-hashes \
+            --progress-spinner off \
+            --desc off
+
+      - name: Audit the locked development toolchain
+        run: >-
+          uv run pip-audit
+          --local
+          --skip-editable
+          --progress-spinner off
+          --desc off
+
+  secret-scan:
+    name: Scan commits for secrets
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Scan committed history
+        uses: trufflesecurity/trufflehog@20652fbbdefffcdaa493a5bf57ab2ac6b1db715b # v3.97.1
+        with:
+          path: ./
+          version: "3.97.1"
+          extra_args: --results=verified,unknown

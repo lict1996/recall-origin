@@ -1,0 +1,100 @@
+name: Bug report
+description: Report a reproducible RecallOrigin defect
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Do not include secrets, personal data, real
+        memories, or unredacted agent transcripts. Report vulnerabilities
+        privately through the Security tab instead.
+
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Use the package version and, for source checkouts, the commit SHA.
+      placeholder: 0.1.0a0 or 0123456789abcdef
+    validations:
+      required: true
+
+  - type: dropdown
+    id: interface
+    attributes:
+      label: Interface
+      options:
+        - Python API
+        - CLI
+        - MCP stdio
+        - HTTP API
+        - Storage or migration
+        - Benchmark or tooling
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include OS, Python, uv, and SQLite versions where relevant.
+      placeholder: |
+        OS:
+        Python:
+        uv:
+        SQLite:
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Provide the smallest redacted example and exact commands.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+
+  - type: dropdown
+    id: data_boundary
+    attributes:
+      label: Does this involve an authorization or deletion boundary?
+      options:
+        - "No"
+        - "Yes, but this is not sensitive"
+        - "Unsure"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Redacted logs or artifacts
+      description: Remove paths, identifiers, memory content, credentials, and personal data.
+      render: text
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Submission checks
+      options:
+        - label: I searched for an existing issue.
+          required: true
+        - label: I removed secrets and sensitive memory or evidence content.
+          required: true
+        - label: This is not a vulnerability requiring private disclosure.
+          required: true

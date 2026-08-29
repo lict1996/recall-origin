@@ -1,0 +1,159 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_NO_PROGRESS: "1"
+  UV_VERSION: "0.12.5"
+
+jobs:
+  quality:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.11"
+          - "3.12"
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Restore locked environment
+        run: uv sync --locked --all-extras --dev
+
+      - name: Check lock file
+        run: uv lock --check
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Check formatting
+        run: uv run ruff format --check .
+
+      - name: Type-check
+        run: uv run mypy --strict src scripts
+
+      - name: Check generated MCP contract
+        run: uv run --extra mcp python scripts/generate_mcp_contract.py --check
+
+      - name: Test with branch coverage
+        run: >-
+          uv run pytest
+          --cov=recall_origin
+          --cov-branch
+          --cov-report=term-missing
+          --cov-report=xml
+
+      - name: Upload coverage evidence
+        if: ${{ always() && matrix.python-version == '3.12' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage-python-3.12
+          path: coverage.xml
+          if-no-files-found: error
+          retention-days: 7
+
+  package:
+    name: Build and install distributions
+    needs:
+      - quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Build wheel and source distribution
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv lock --check
+          source_epoch="$(git show -s --format=%ct HEAD)"
+          SOURCE_DATE_EPOCH="$source_epoch" uv build --no-sources --clear
+          uvx --from twine==7.0.0 twine check dist/*
+
+      - name: Verify source distribution reproduction assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdist_path="$(find dist -maxdepth 1 -type f -name '*.tar.gz' -print -quit)"
+          test -n "$sdist_path"
+          tar -tzf "$sdist_path" | sed 's#^[^/]*/##' > "$RUNNER_TEMP/sdist-files.txt"
+          required_paths=(
+            "uv.lock"
+            "scripts/generate_mcp_contract.py"
+            "scripts/package_surface_smoke.py"
+            "scripts/reliability_gate.py"
+            "scripts/render_benchmark_summary.py"
+            "scripts/verify_wheel_contents.py"
+            "examples/http/serve_local.py"
+            "examples/mcp/README.md"
+          )
+          for required_path in "${required_paths[@]}"; do
+            grep -Fqx "$required_path" "$RUNNER_TEMP/sdist-files.txt"
+          done
+
+      - name: Install wheel in a clean environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          package_venv="$RUNNER_TEMP/recall-origin-package-venv"
+          python -m venv "$package_venv"
+          "$package_venv/bin/python" -m pip install --disable-pip-version-check dist/*.whl
+          "$package_venv/bin/python" -c \
+            "import importlib.metadata,recall_origin; assert recall_origin.__version__ == importlib.metadata.version('recall-origin')"
+          "$package_venv/bin/recallctl" --help
+
+      - name: Upload candidate distributions
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: candidate-distributions
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0

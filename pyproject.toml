@@ -1,0 +1,122 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "recall-origin"
+version = "0.1.0a0"
+description = "Source-traceable, revisioned memory runtime for AI agents."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+authors = [{ name = "lict1996" }]
+keywords = [
+  "agent",
+  "memory",
+  "mcp",
+  "sqlite",
+  "retrieval",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Typing :: Typed",
+]
+dependencies = [
+  "platformdirs>=4.3,<5",
+  "pydantic>=2.10,<3",
+  "typer>=0.15,<1",
+]
+
+[project.urls]
+Homepage = "https://github.com/lict1996/recall-origin"
+Repository = "https://github.com/lict1996/recall-origin"
+Issues = "https://github.com/lict1996/recall-origin/issues"
+Changelog = "https://github.com/lict1996/recall-origin/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/lict1996/recall-origin/tree/main/docs"
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.12,<2"]
+server = [
+  "fastapi>=0.116,<1",
+  "uvicorn>=0.35,<1",
+]
+
+[dependency-groups]
+dev = [
+  "hypothesis>=6.135,<7",
+  "jsonschema>=4.24,<5",
+  "mypy>=1.16,<2",
+  "pip-audit>=2.9,<3",
+  "pytest>=9.0.3,<10",
+  "pytest-cov>=6.2,<7",
+  "ruff>=0.12,<1",
+]
+
+[project.scripts]
+recallctl = "recall_origin.interfaces.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/recall_origin"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/src",
+  "/tests",
+  "/contracts",
+  "/docs",
+  "/examples",
+  "/scripts",
+  "/README.md",
+  "/README.zh-CN.md",
+  "/CHANGELOG.md",
+  "/CITATION.cff",
+  "/CODE_OF_CONDUCT.md",
+  "/LICENSE",
+  "/NOTICE",
+  "/SECURITY.md",
+  "/CONTRIBUTING.md",
+  "/REPRODUCING.md",
+  "/uv.lock",
+]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers --strict-config"
+testpaths = ["tests"]
+markers = [
+  "slow: tests excluded from the default pull-request suite",
+  "fault: process or storage fault-injection tests",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+  "E",
+  "F",
+  "I",
+  "B",
+  "UP",
+  "SIM",
+  "RUF",
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["recall_origin"]
+
+[tool.coverage.run]
+branch = true
+source = ["recall_origin"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 85

@@ -1,0 +1,45 @@
+{
+  "benchmarks": {
+    "baseline_label": "Current engine",
+    "candidate_label": "Not measured",
+    "metrics": [
+      {
+        "baseline": 1.0,
+        "candidate": null,
+        "direction": "higher",
+        "name": "Recall@10",
+        "sample_size": 250,
+        "unit": "ratio"
+      },
+      {
+        "baseline": 1.0,
+        "candidate": null,
+        "direction": "higher",
+        "name": "MRR",
+        "sample_size": 250,
+        "unit": "ratio"
+      },
+      {
+        "baseline": 226.763375,
+        "candidate": null,
+        "direction": "lower",
+        "name": "Search p95",
+        "sample_size": 250,
+        "unit": "ms"
+      },
+      {
+        "baseline": 23.436704,
+        "candidate": null,
+        "direction": "higher",
+        "name": "Ingest throughput",
+        "sample_size": 10000,
+        "unit": "writes/s"
+      }
+    ],
+    "notes": [
+      "All displayed numbers come from this artifact's measured current-engine run.",
+      "No vector retriever was configured; no vector comparison is reported."
+    ]
+  },
+  "generated_at": "2026-08-29T18:32:17.724408+00:00"
+}

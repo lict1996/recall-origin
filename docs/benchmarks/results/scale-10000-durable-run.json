@@ -1,0 +1,32 @@
+{
+  "artifact": "scale-10000-durable.json",
+  "command": [
+    "uv",
+    "run",
+    "python",
+    "-m",
+    "recall_origin.benchmarks.runner",
+    "--scale",
+    "10000",
+    "--seed",
+    "20260830",
+    "--query-count",
+    "250",
+    "--k",
+    "10",
+    "--output",
+    "docs/benchmarks/results/scale-10000-durable.json",
+    "--inspector-output",
+    "docs/benchmarks/results/scale-10000-durable-inspector.json"
+  ],
+  "ended_at_local": "2026-08-30T02:32:19+08:00",
+  "ended_at_utc": "2026-08-29T18:32:19Z",
+  "started_at_local": "2026-08-30T02:24:34+08:00",
+  "started_at_utc": "2026-08-29T18:24:34Z",
+  "timing": {
+    "real_seconds": 465.59,
+    "system_cpu_seconds": 56.19,
+    "user_cpu_seconds": 62.49
+  },
+  "timing_tool": "/usr/bin/time -p"
+}
