@@ -1,8 +1,7 @@
 {
   "artifact": "scale-10000-durable.json",
-  "command": [
-    "uv",
-    "run",
+  "artifact_sha256": "b72e398c1b1bb387f6b549de5d4a598f412784145997ab503240c99a1e0b9e6f",
+  "benchmark_command": [
     "python",
     "-m",
     "recall_origin.benchmarks.runner",
@@ -19,14 +18,29 @@
     "--inspector-output",
     "docs/benchmarks/results/scale-10000-durable-inspector.json"
   ],
-  "ended_at_local": "2026-08-30T02:32:19+08:00",
-  "ended_at_utc": "2026-08-29T18:32:19Z",
-  "started_at_local": "2026-08-30T02:24:34+08:00",
-  "started_at_utc": "2026-08-29T18:24:34Z",
-  "timing": {
-    "real_seconds": 465.59,
-    "system_cpu_seconds": 56.19,
-    "user_cpu_seconds": 62.49
+  "command": [
+    "uv",
+    "run",
+    "python",
+    "scripts/benchmark_release.py"
+  ],
+  "ended_at_local": "2026-08-30T05:58:52.106173+08:00",
+  "ended_at_utc": "2026-08-29T21:58:52.106173+00:00",
+  "environment": {
+    "python_executable": "python3",
+    "python_version": "3.12.5",
+    "uv_lock_sha256": "632e2ff5272f48bda34a738849226ecbc261b71bafe3232c68256e4f86abb75d",
+    "uv_version": "uv 0.12.5 (210d1f678 2026-08-14 aarch64-apple-darwin)"
   },
-  "timing_tool": "/usr/bin/time -p"
+  "git_commit": "534b7d66dfb27d235c49ee4e0d00a847d1a6abd2",
+  "schema_version": "recall-origin-benchmark-run/v1",
+  "started_at_local": "2026-08-30T05:49:41.158583+08:00",
+  "started_at_utc": "2026-08-29T21:49:41.158583+00:00",
+  "timing": {
+    "real_seconds": 551.52362,
+    "system_cpu_seconds": 73.181648,
+    "user_cpu_seconds": 86.447221
+  },
+  "timing_scope": "benchmark_command",
+  "timing_tool": "time.perf_counter + resource.getrusage(RUSAGE_CHILDREN)"
 }

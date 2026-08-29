@@ -1,10 +1,10 @@
 {
-  "generated_at_utc": "2026-08-29T18:32:17.724408+00:00",
+  "generated_at_utc": "2026-08-29T21:58:49.352753+00:00",
   "ingest": {
-    "duration_seconds": 426.681164,
+    "duration_seconds": 505.490717,
     "path": "public MemoryEngine.remember (end-to-end)",
     "writes": 10000,
-    "writes_per_second": 23.436704
+    "writes_per_second": 19.782757
   },
   "quality": {
     "case_count": 4,
@@ -15,9 +15,9 @@
     "by_query_type": {
       "exact": {
         "latency_ms": {
-          "p50": 198.130625,
-          "p95": 234.160625,
-          "p99": 262.61925
+          "p50": 252.582333,
+          "p95": 281.33975,
+          "p99": 286.183125
         },
         "mrr": 1.0,
         "query_count": 84,
@@ -25,9 +25,9 @@
       },
       "lexical": {
         "latency_ms": {
-          "p50": 120.953291,
-          "p95": 151.075875,
-          "p99": 175.065917
+          "p50": 131.263542,
+          "p95": 147.996917,
+          "p99": 162.725
         },
         "mrr": 1.0,
         "query_count": 166,
@@ -35,9 +35,9 @@
       }
     },
     "latency_ms": {
-      "p50": 133.909166,
-      "p95": 226.763375,
-      "p99": 239.991542
+      "p50": 138.209,
+      "p95": 266.0725,
+      "p99": 283.300916
     },
     "mrr": 1.0,
     "recall_at_k": 1.0
@@ -48,7 +48,7 @@
     "package_version": "0.1.0a0",
     "platform": "macOS-15.6.1-arm64-arm-64bit",
     "python_version": "3.12.5",
-    "source_snapshot_sha256": "9786886c23caf807d387009eb02784eeea6b1a76b69fcc91e869c5c5c52b8a72",
+    "source_snapshot_sha256": "44c4b01ffdb9cf7bb9592f89dfa4fcdac93ce85ab648d1566fc10a4bddb75f4d",
     "sqlite_version": "3.53.3"
   },
   "schema_version": "recall-origin-benchmark-summary/v1",
@@ -64,7 +64,7 @@
     "vector_baseline": null
   },
   "source_artifact": "scale-10000-durable.json",
-  "source_artifact_sha256": "a8483be63b42dd93422ba74d4c3bf07cd6bb5a8f55c9c79ed9480826ded96387",
+  "source_artifact_sha256": "b72e398c1b1bb387f6b549de5d4a598f412784145997ab503240c99a1e0b9e6f",
   "storage": {
     "database_file_bytes": {
       "purge_registry": 40960,

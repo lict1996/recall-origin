@@ -20,7 +20,7 @@
         "unit": "ratio"
       },
       {
-        "baseline": 226.763375,
+        "baseline": 266.0725,
         "candidate": null,
         "direction": "lower",
         "name": "Search p95",
@@ -28,7 +28,7 @@
         "unit": "ms"
       },
       {
-        "baseline": 23.436704,
+        "baseline": 19.782757,
         "candidate": null,
         "direction": "higher",
         "name": "Ingest throughput",
@@ -41,5 +41,5 @@
       "No vector retriever was configured; no vector comparison is reported."
     ]
   },
-  "generated_at": "2026-08-29T18:32:17.724408+00:00"
+  "generated_at": "2026-08-29T21:58:49.352753+00:00"
 }

@@ -373,16 +373,16 @@ The checked-in 10k durable run is one sequential measurement on macOS arm64:
 |---|---:|
 | Required behavioral cases | 4/4 |
 | Recall@10 / MRR | 1.000 / 1.000 (250 queries) |
-| Search p50 / p95 / p99 | 133.909 / 226.763 / 239.992 ms |
-| Durable end-to-end ingest | 23.437 writes/s |
+| Search p50 / p95 / p99 | 138.209 / 266.073 / 283.301 ms |
+| Durable end-to-end ingest | 19.783 writes/s |
 | SQLite footprint | 41,177,088 bytes |
-| Whole command wall clock | 465.59 s |
+| Whole command wall clock | 551.52 s |
 
 These unique-marker queries measure deterministic retrieval correctness and
 regression behavior, not production semantic relevance. The run is not a
 cross-system comparison, has no vector arm, and does not establish a latency
 SLO. Its canonical artifact SHA-256 is
-`a8483be63b42dd93422ba74d4c3bf07cd6bb5a8f55c9c79ed9480826ded96387`.
+`b72e398c1b1bb387f6b549de5d4a598f412784145997ab503240c99a1e0b9e6f`.
 
 See [benchmark methodology](docs/benchmarks/README.md) and
 [the complete measured artifact](docs/benchmarks/results/README.md), plus

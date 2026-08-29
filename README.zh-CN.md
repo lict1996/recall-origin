@@ -338,15 +338,15 @@ adapter 时，vector baseline 会明确记录为 `null`，不会用估算值代�
 |---|---:|
 | 必过行为用例 | 4/4 |
 | Recall@10 / MRR | 1.000 / 1.000（250 queries） |
-| Search p50 / p95 / p99 | 133.909 / 226.763 / 239.992 ms |
-| Durable 端到端写入 | 23.437 writes/s |
+| Search p50 / p95 / p99 | 138.209 / 266.073 / 283.301 ms |
+| Durable 端到端写入 | 19.783 writes/s |
 | SQLite 占用 | 41,177,088 bytes |
-| 整条命令 wall clock | 465.59 s |
+| 整条命令 wall clock | 551.52 s |
 
 这些 unique-marker query 衡量确定性检索正确性与回归行为，不代表生产语义相关性。
 这不是跨系统对比，没有 vector arm，也不能据此宣称 latency SLO。canonical artifact
 SHA-256 为
-`a8483be63b42dd93422ba74d4c3bf07cd6bb5a8f55c9c79ed9480826ded96387`。
+`b72e398c1b1bb387f6b549de5d4a598f412784145997ab503240c99a1e0b9e6f`。
 
 详见 [benchmark 方法](docs/benchmarks/README.md)、
 [完整实测 artifact](docs/benchmarks/results/README.md)与
