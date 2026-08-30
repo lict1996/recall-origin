@@ -5,12 +5,12 @@
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB)](https://www.python.org/)
 [![许可证：Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 
-**记忆要带凭证。**
+**每条记忆，都应有据可查。**
 
 RecallOrigin 是一个本地优先、面向 AI Agent 的记忆运行时。它把记忆保存为
 “有证据关联、可修订、有明确作用域的声明”，并说明每条记忆为什么会被召回。
 
-[English](README.md) ·
+[English](README.md#english-overview) ·
 [架构](docs/concepts/architecture.md) ·
 [安全](docs/security/threat-model.md) ·
 [复现实验](REPRODUCING.md)
@@ -20,6 +20,28 @@ RecallOrigin 是一个本地优先、面向 AI Agent 的记忆运行时。它把
 > 服务、远程多租户平台，也不宣称达到了 SOTA 记忆效果。当前支持的拓扑是
 > “每个 store 只由一个应用进程持有”。项目不内置模型总结器或抽取器；需要自动
 > formation 时，由 Host 提供候选。
+
+## `v0.1.0a0` 发布验证摘要
+
+这些数字来自对应的
+[CI](https://github.com/lict1996/recall-origin/actions/workflows/ci.yml)、
+[CodeQL](https://github.com/lict1996/recall-origin/actions/workflows/codeql.yml)、
+[Security](https://github.com/lict1996/recall-origin/actions/workflows/security.yml)、
+[GitHub Release](https://github.com/lict1996/recall-origin/actions/runs/33315155530)
+工作流，以及仓内带校验和的 benchmark 产物：
+
+| 验证项 | 结果 |
+|---|---:|
+| 自动化测试 | 308 项测试分别在 Python 3.11、3.12 通过 |
+| 测试覆盖率（启用分支统计） | 89.63%（门槛 85%） |
+| 幂等重放门禁 | 同一请求共投递 10,000 次，最终仅 1 event、1 claim、1 head、1 个可见命中 |
+| 安装验证 | 干净 Python 3.12 环境中的 Python、CLI、MCP、HTTP 表面全部通过 |
+| 安全检查 | CodeQL、锁定依赖审计与提交历史 secret scan 通过 |
+| Release 产物 | wheel、sdist、SPDX SBOM 的 SHA-256 校验通过，并生成 GitHub build provenance |
+
+10k 持久化合成文档实测的完整数字、图表和边界放在本文的
+[可复现实验与适用边界](#可复现实验与适用边界)一节，原始产物索引见
+[实测报告](docs/benchmarks/results/README.md)。
 
 ## 为什么做这个项目
 
@@ -111,9 +133,9 @@ uv sync --locked --all-extras
 uv run recallctl doctor --json
 ```
 
-## 可以真正检查的证据
+## 可检查的证据
 
-Evidence Pack 是一份有预算的快照，不是一段隐藏提示词。manifest 列出被选中的
+Evidence Pack 是一份范围和大小受限的快照，不是一段隐藏提示词。manifest 列出被选中的
 claim revision 与来源切片；`retrieval.json` 保存不含正文的排序轨迹；单文件
 Inspector 完全离线、只读运行。
 
@@ -201,7 +223,7 @@ Host 配置中固定绝对数据库路径与精确 partition：
 治理与删除工具。完整配置见 [MCP 示例](examples/mcp/README.md)和自动生成的
 [协议契约](contracts/mcp-tools.json)。
 
-#### 安全的 Agent 写入—召回闭环
+#### 受治理的 Agent 写入与召回流程
 
 Agent 显式调用 `memory_put(mode="remember", ...)` 后会得到 `claim_id` 和
 `revision_id`，但新声明会有意保持为 `unverified` candidate，避免 Agent 静默确认
@@ -319,33 +341,35 @@ ID、`memory_key`、`subject_id` 和 revision reason。不要在这些字段里�
 擦除的正文、直接 PII 或邮箱地址。精确范围见[删除与残留元数据
 矩阵](docs/security/deletion-boundary.md)。
 
-## 可复现证据，而不是排行榜口号
+## 可复现实验与适用边界
 
 仓库包含两类不同的证据：
 
 - 覆盖幂等、CAS、worker lease 接管、删除竞态、异常关闭、只读错误、迁移和旧备份
   防复活的可靠性门禁；
-- 支持 `100`、`10k`、`100k`、`1M` 文档的确定性离线检索 benchmark。
+- 可运行 `100`、`10k`、`100k`、`1M` 文档规模的确定性离线检索 benchmark
+  runner。
 
-小语料只是一项 synthetic smoke test，不能证明广泛的现实问答质量。未配置 vector
-adapter 时，vector baseline 会明确记录为 `null`，不会用估算值代替。
+当前只发布了 10k 实测；100 条文档只是快速检查，100k 和 1M 尚未运行。小语料不能
+证明广泛的现实问答质量。未配置向量检索适配器时，对照组会明确记录为 `null`，
+不会用估算值代替。
 
-仓内 10k durable run 是在 macOS arm64 上进行的一次串行实测：
+仓内 10k 持久化测试是在 macOS arm64 上进行的一次串行实测：
 
 ![RecallOrigin 10k durable synthetic benchmark](docs/benchmarks/results/scale-10000-durable-summary.svg)
 
-| 10,000 条 synthetic document 的实测项 | 结果 |
+| 10,000 条确定性合成文档的实测项 | 结果 |
 |---|---:|
 | 必过行为用例 | 4/4 |
-| Recall@10 / MRR | 1.000 / 1.000（250 queries） |
+| Recall@10 / MRR | 1.000 / 1.000（250 次查询） |
 | Search p50 / p95 / p99 | 138.209 / 266.073 / 283.301 ms |
-| Durable 端到端写入 | 19.783 writes/s |
-| SQLite 占用 | 41,177,088 bytes |
-| 整条命令 wall clock | 551.52 s |
+| 持久化端到端写入吞吐 | 19.783 writes/s |
+| 数据库文件占用（含 purge registry） | 41,177,088 bytes |
+| 命令总耗时 | 551.52 s |
 
-这些 unique-marker query 衡量确定性检索正确性与回归行为，不代表生产语义相关性。
-这不是跨系统对比，没有 vector arm，也不能据此宣称 latency SLO。canonical artifact
-SHA-256 为
+这些带唯一标记的查询衡量确定性检索正确性与回归行为，不代表生产语义相关性。
+这不是跨系统对比，也没有向量检索对照组，不能据此声明延迟服务等级目标。
+标准产物的 SHA-256 为
 `b72e398c1b1bb387f6b549de5d4a598f412784145997ab503240c99a1e0b9e6f`。
 
 详见 [benchmark 方法](docs/benchmarks/README.md)、
