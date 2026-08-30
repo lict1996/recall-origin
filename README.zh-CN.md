@@ -17,25 +17,25 @@ RecallOrigin 是一个本地优先、面向 AI Agent 的记忆运行时。它把
 
 > [!IMPORTANT]
 > RecallOrigin `0.1.0a0` 是早期 alpha，面向可信单机环境。它不是分布式高可用
-> 服务、远程多租户平台，也不宣称达到了 SOTA 记忆效果。当前支持的拓扑是
-> “每个 store 只由一个应用进程持有”。项目不内置模型总结器或抽取器；需要自动
-> formation 时，由 Host 提供候选。
+> 服务、远程多租户平台，也不宣称记忆效果达到业界最佳。当前仅支持一个应用进程
+> 独占一个存储库。项目不内置基于模型的总结器或抽取器；若需自动形成记忆，候选
+> 内容由宿主提供。
 
 ## `v0.1.0a0` 发布验证摘要
 
 这些数字来自对应的
-[CI](https://github.com/lict1996/recall-origin/actions/workflows/ci.yml)、
-[CodeQL](https://github.com/lict1996/recall-origin/actions/workflows/codeql.yml)、
-[Security](https://github.com/lict1996/recall-origin/actions/workflows/security.yml)、
+[CI](https://github.com/lict1996/recall-origin/actions/runs/33317492559)、
+[CodeQL](https://github.com/lict1996/recall-origin/actions/runs/33317492589)、
+[Security](https://github.com/lict1996/recall-origin/actions/runs/33317492584)、
 [GitHub Release](https://github.com/lict1996/recall-origin/actions/runs/33315155530)
 工作流，以及仓内带校验和的 benchmark 产物：
 
 | 验证项 | 结果 |
 |---|---:|
 | 自动化测试 | 308 项测试分别在 Python 3.11、3.12 通过 |
-| 测试覆盖率（启用分支统计） | 89.63%（门槛 85%） |
+| 覆盖率（coverage.py） | 总计 89.63%（行覆盖 92.06%，分支覆盖 79.31%；门槛按总计 85%） |
 | 幂等重放门禁 | 同一请求共投递 10,000 次，最终仅 1 event、1 claim、1 head、1 个可见命中 |
-| 安装验证 | 干净 Python 3.12 环境中的 Python、CLI、MCP、HTTP 表面全部通过 |
+| 发行包 smoke | 干净 Python 3.12 环境中的 Python API、CLI、MCP 工具与资源、HTTP OpenAPI 契约检查均通过 |
 | 安全检查 | CodeQL、锁定依赖审计与提交历史 secret scan 通过 |
 | Release 产物 | wheel、sdist、SPDX SBOM 的 SHA-256 校验通过，并生成 GitHub build provenance |
 
@@ -347,16 +347,20 @@ ID、`memory_key`、`subject_id` 和 revision reason。不要在这些字段里�
 
 - 覆盖幂等、CAS、worker lease 接管、删除竞态、异常关闭、只读错误、迁移和旧备份
   防复活的可靠性门禁；
-- 可运行 `100`、`10k`、`100k`、`1M` 文档规模的确定性离线检索 benchmark
-  runner。
+- 确定性离线检索 benchmark runner；命令接受 `100`、`10k`、`100k`、`1M`
+  四档文档规模。
 
-当前只发布了 10k 实测；100 条文档只是快速检查，100k 和 1M 尚未运行。小语料不能
-证明广泛的现实问答质量。未配置向量检索适配器时，对照组会明确记录为 `null`，
-不会用估算值代替。
+当前发布证据只包含 10k 实测。100 条文档仅用于快速 smoke；100k 和 1M 尚未运行，
+因此本项目不对这两个规模给出性能或效果结论。小语料不能证明广泛的现实问答质量。
+未配置向量检索适配器时，对照组会明确记录为 `null`，不会用估算值代替。
 
 仓内 10k 持久化测试是在 macOS arm64 上进行的一次串行实测：
 
 ![RecallOrigin 10k durable synthetic benchmark](docs/benchmarks/results/scale-10000-durable-summary.svg)
+
+测试口径：10,000 条文档，随机种子 `20260830`，250 次查询（84 次精确查询、
+166 次词法查询），`k=10`；环境为 CPython 3.12.5、SQLite 3.53.3、
+macOS 15.6.1 arm64。
 
 | 10,000 条确定性合成文档的实测项 | 结果 |
 |---|---:|
@@ -364,7 +368,7 @@ ID、`memory_key`、`subject_id` 和 revision reason。不要在这些字段里�
 | Recall@10 / MRR | 1.000 / 1.000（250 次查询） |
 | Search p50 / p95 / p99 | 138.209 / 266.073 / 283.301 ms |
 | 持久化端到端写入吞吐 | 19.783 writes/s |
-| 数据库文件占用（含 purge registry） | 41,177,088 bytes |
+| 实测文件合计 | 41,177,088 bytes（SQLite 41,136,128 + purge registry 40,960，约 39.27 MiB） |
 | 命令总耗时 | 551.52 s |
 
 这些带唯一标记的查询衡量确定性检索正确性与回归行为，不代表生产语义相关性。
@@ -375,6 +379,13 @@ ID、`memory_key`、`subject_id` 和 revision reason。不要在这些字段里�
 详见 [benchmark 方法](docs/benchmarks/README.md)、
 [完整实测 artifact](docs/benchmarks/results/README.md)与
 [复现说明](REPRODUCING.md)。README 中的数字来自仓内 artifact，不使用估算值。
+
+原始数据可直接下载：
+[完整 JSON](docs/benchmarks/results/scale-10000-durable.json)、
+[摘要 JSON](docs/benchmarks/results/scale-10000-durable-summary.json)、
+[指标 CSV](docs/benchmarks/results/scale-10000-durable-metrics.csv)、
+[运行元数据](docs/benchmarks/results/scale-10000-durable-run.json)和
+[SHA-256 校验清单](docs/benchmarks/results/SHA256SUMS)。
 
 ## 开发与验证
 

@@ -23,25 +23,27 @@ Python、MCP 和回环 HTTP 示例都调用同一个核心，因此授权、删�
 每条声明都能回到 event、evidence 和 revision 链路。Agent 与模型生成的内容默认
 是待确认候选，不能继承人工确认状态。检索保留 exact、FTS5、可选向量与 RRF 排序
 轨迹，并严格隔离 `workspace`、`user`、`agent_private` 和 `session_private`
-partition。删除时，fence 先阻止读取，managed purge 清理引擎托管副本，签名
-registry 防止恢复旧数据库快照后让已删内容重新可见。
+partition。删除时，fence 先让目标在所有引擎读取路径中不可见，managed purge
+再清理引擎托管副本；签名 registry 用于阻止旧数据库快照在本引擎中让已删内容
+重新可见。显式导出、文件系统或云快照、离线备份和远程 Provider 副本不在引擎
+直接清理范围内。
 
 ### `v0.1.0a0` 已验证数据
 
 | 验证项 | 结果 |
 |---|---:|
 | 自动化测试 | 308 项测试分别在 Python 3.11、3.12 通过 |
-| 测试覆盖率（启用分支统计） | 89.63%（门槛 85%） |
+| 覆盖率（coverage.py） | 总计 89.63%（行覆盖 92.06%，分支覆盖 79.31%；门槛按总计 85%） |
 | 幂等重放门禁 | 同一请求共投递 10,000 次，最终仅 1 event、1 claim、1 head、1 个可见命中 |
-| 发行包安装后验证 | Python、CLI、MCP、HTTP 全部通过 |
+| 发行包 smoke | 干净 Python 3.12 环境中的 Python API、CLI、MCP 工具与资源、HTTP OpenAPI 契约检查均通过 |
 | 供应链 | wheel、sdist、SPDX SBOM 的 SHA-256 校验通过，并生成 GitHub build provenance |
 
 仓内还保存了一次 10,000 条确定性合成文档实测。完整指标、可视化与适用边界见
 [中文实测说明](README.zh-CN.md#可复现实验与适用边界)和
 [带校验和的产物索引](docs/benchmarks/results/README.md)。发布质量数据来自对应的
-[CI](https://github.com/lict1996/recall-origin/actions/workflows/ci.yml)、
-[CodeQL](https://github.com/lict1996/recall-origin/actions/workflows/codeql.yml)、
-[Security](https://github.com/lict1996/recall-origin/actions/workflows/security.yml)和
+[CI](https://github.com/lict1996/recall-origin/actions/runs/33317492559)、
+[CodeQL](https://github.com/lict1996/recall-origin/actions/runs/33317492589)、
+[Security](https://github.com/lict1996/recall-origin/actions/runs/33317492584)和
 [`v0.1.0a0` Release](https://github.com/lict1996/recall-origin/actions/runs/33315155530)
 工作流。
 
@@ -404,12 +406,15 @@ The repository includes two different kinds of evidence:
 - reliability gates for idempotency, compare-and-swap, worker lease takeover,
   deletion races, abnormal shutdown, read-only failures, migration, and
   backup-restoration non-resurrection;
-- a deterministic offline retrieval benchmark at `100`, `10k`, `100k`, or
-  `1M` documents.
+- a deterministic offline retrieval benchmark runner whose command accepts
+  `100`, `10k`, `100k`, or `1M` documents.
 
-The small corpus is a synthetic smoke test. It is not evidence of broad
-real-world answer quality. The vector baseline is `null` when no vector
-adapter is configured; RecallOrigin never substitutes an estimate.
+Only the checked-in 10k run is published as measured evidence. The
+100-document corpus is a synthetic smoke test; 100k and 1M have not been run,
+so this project makes no performance or quality claim for those scales. The
+small corpus is not evidence of broad real-world answer quality. The vector
+baseline is `null` when no vector adapter is configured; RecallOrigin never
+substitutes an estimate.
 
 The checked-in 10k durable run is one sequential measurement on macOS arm64:
 
@@ -421,7 +426,7 @@ The checked-in 10k durable run is one sequential measurement on macOS arm64:
 | Recall@10 / MRR | 1.000 / 1.000 (250 queries) |
 | Search p50 / p95 / p99 | 138.209 / 266.073 / 283.301 ms |
 | Durable end-to-end ingest | 19.783 writes/s |
-| SQLite footprint | 41,177,088 bytes |
+| Measured files | 41,177,088 bytes (SQLite 41,136,128 + purge registry 40,960; about 39.27 MiB) |
 | Whole command wall clock | 551.52 s |
 
 These unique-marker queries measure deterministic retrieval correctness and
