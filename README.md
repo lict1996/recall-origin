@@ -5,13 +5,59 @@
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB)](https://www.python.org/)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 
+[简体中文完整说明](README.zh-CN.md) ·
+[English](#english-overview) ·
+[架构](docs/concepts/architecture.md) ·
+[安全模型](docs/security/threat-model.md) ·
+[复现实验](REPRODUCING.md)
+
+## 中文简介
+
+**RecallOrigin：可追溯、可修订的本地 Agent 记忆运行时。**
+
+RecallOrigin 是一个本地优先的 AI Agent 记忆运行时。它不把模型生成的内容直接
+当成事实，而是将记忆保存为带作用域、证据、修订历史和信任状态的声明。CLI、
+Python、MCP 和回环 HTTP 示例都调用同一个核心，因此授权、删除、检索与审计规则不会
+因接入方式不同而分叉。
+
+每条声明都能回到 event、evidence 和 revision 链路。Agent 与模型生成的内容默认
+是待确认候选，不能继承人工确认状态。检索保留 exact、FTS5、可选向量与 RRF 排序
+轨迹，并严格隔离 `workspace`、`user`、`agent_private` 和 `session_private`
+partition。删除时，fence 先阻止读取，managed purge 清理引擎托管副本，签名
+registry 防止恢复旧数据库快照后让已删内容重新可见。
+
+### `v0.1.0a0` 已验证数据
+
+| 验证项 | 结果 |
+|---|---:|
+| 自动化测试 | 308 项测试分别在 Python 3.11、3.12 通过 |
+| 测试覆盖率（启用分支统计） | 89.63%（门槛 85%） |
+| 幂等重放门禁 | 同一请求共投递 10,000 次，最终仅 1 event、1 claim、1 head、1 个可见命中 |
+| 发行包安装后验证 | Python、CLI、MCP、HTTP 全部通过 |
+| 供应链 | wheel、sdist、SPDX SBOM 的 SHA-256 校验通过，并生成 GitHub build provenance |
+
+仓内还保存了一次 10,000 条确定性合成文档实测。完整指标、可视化与适用边界见
+[中文实测说明](README.zh-CN.md#可复现实验与适用边界)和
+[带校验和的产物索引](docs/benchmarks/results/README.md)。发布质量数据来自对应的
+[CI](https://github.com/lict1996/recall-origin/actions/workflows/ci.yml)、
+[CodeQL](https://github.com/lict1996/recall-origin/actions/workflows/codeql.yml)、
+[Security](https://github.com/lict1996/recall-origin/actions/workflows/security.yml)和
+[`v0.1.0a0` Release](https://github.com/lict1996/recall-origin/actions/runs/33315155530)
+工作流。
+
+当前版本定位是**可信单机、单应用进程、SQLite alpha**。完整中文介绍、快速接入、
+安全边界和限制请见 [README.zh-CN.md](README.zh-CN.md)。
+
+---
+
+## English overview
+
 **Memory with receipts.**
 
 RecallOrigin is a local-first memory runtime for AI agents. It stores memories
 as revisioned claims linked to evidence, keeps authorization scopes exact, and
 explains why each claim was recalled.
 
-[简体中文](README.zh-CN.md) ·
 [Architecture](docs/concepts/architecture.md) ·
 [Security](docs/security/threat-model.md) ·
 [Reproduce the evidence](REPRODUCING.md)
