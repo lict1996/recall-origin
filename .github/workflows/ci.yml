@@ -23,6 +23,8 @@ jobs:
     name: Python ${{ matrix.python-version }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    env:
+      UV_PYTHON: ${{ matrix.python-version }}
     strategy:
       fail-fast: false
       matrix:
@@ -51,6 +53,20 @@ jobs:
 
       - name: Restore locked environment
         run: uv sync --locked --all-extras --dev
+
+      - name: Verify Python matrix interpreter
+        env:
+          EXPECTED_PYTHON: ${{ matrix.python-version }}
+        run: |
+          uv run python - <<'PY'
+          import os
+          import sys
+
+          expected = tuple(map(int, os.environ["EXPECTED_PYTHON"].split(".")))
+          actual = sys.version_info[:2]
+          if actual != expected:
+              raise SystemExit(f"expected Python {expected}, got {actual}")
+          PY
 
       - name: Check lock file
         run: uv lock --check
