@@ -17,7 +17,7 @@ This directory contains one bounded, reproducible local measurement for RecallOr
 | Search p99 | 283.301 ms | 250 queries |
 | Durable ingest | 19.783 writes/s | 10,000 writes |
 | Ingest duration | 505.491 s | 10,000 writes |
-| SQLite footprint | 41,177,088 bytes | 10,000 documents |
+| Measured files | 41,177,088 bytes | SQLite 41,136,128 + purge registry 40,960 |
 | Whole command wall clock | 551.52 s | one run |
 
 The exact-query segment contained 84 queries and the lexical-marker segment contained
